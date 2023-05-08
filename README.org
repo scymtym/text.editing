@@ -1,0 +1,60 @@
+#+TITLE:    text.editing README
+#+AUTHOR:   Jan Moringen
+#+EMAIL:    jmoringe@techfak.uni-bielefeld.de
+#+LANGUAGE: en
+
+#+OPTIONS:  toc:nil num:nil
+#+SEQ_TODO: TODO STARTED | DONE
+
+* Introduction
+
+  This library provides protocols and implementations of those
+  protocols for text editing operations which are required by, for
+  example, text editors or commandline processors (like REPLs). This
+  library relies on the [[https://github.com/RobertStrandh/cluffer][Cluffer]] library for the fundamental concepts
+  of buffers, lines and cursors. The functionality provided by this
+  library includes:
+
+  + Cursor movement (by various "units")
+
+  + Insertion and deletion (by various "units")
+
+  + Transformations (for example changing case or transposing)
+
+  + Killing, copying and inserting
+
+  + Multiple cursors
+
+  + "Mark" cursors and regions
+
+  + Undo (work in progress)
+
+  + Operations on expression (like paredit for Emacs, work in
+    progress)
+
+  + Search and incremental search (work in progress)
+
+  + Abbreviations (work in progress)
+
+  This library does not provide
+
+  + Data structures for editor buffers (the cluffer library does that)
+
+  + Input handling or a command processor
+
+  + Advanced parsing (see [[https://github.com/robert-strandh/incrementalist][incrementalist]] for that)
+
+  + Syntax highlighting (see TODO for that)
+
+  + Presentation/rendering/display functions for the contents of text buffers
+
+  *This library is under active development. Its ASDF system
+  structure, package structure, exported symbols and protocols may
+  change at any time. Consult the NEWS file or the "Changelog" section
+  of the manual for lists of changes in specific versions.*
+
+  This document only gives a very brief overview and highlights some
+  features. Proper documentation can be found in the
+  file:documentation directory.
+
+* TODO Usage Overview
