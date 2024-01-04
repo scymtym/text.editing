@@ -1,0 +1,13 @@
+*.aux
+*.cp
+*.cps
+*.fn
+*.fns
+*.log
+*.toc
+
+*.html
+*.info
+*.pdf
+
+generated-version.texi

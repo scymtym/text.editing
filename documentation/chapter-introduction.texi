@@ -1,0 +1,45 @@
+@node Introduction
+@chapter Introduction
+
+The @sysname{} library provides manipulation functions for the contents
+of text buffers that are required by, for example, commandline
+processors, input editors and text editors.  The provided functionality
+includes
+
+@itemize
+
+@item Cursor movement (by various ``units'')
+
+@item Insertion and deletion (by various ``units'')
+
+@item Transformations (for example changing case or transposing)
+
+@item Operations on expression (like paredit for Emacs)
+
+@item Undo (not yet implemented)
+
+@item Killing, copying and inserting
+
+@item Multiple cursors
+
+@item Search
+
+@item Abbreviations (work in progress)
+
+@end itemize
+
+@sysname{} does not provide
+
+@itemize
+
+@item Data structures for editor buffers (the cluffer library does that)
+
+@item Input handling or a command processor
+
+@item Advance parsing (see TODO for that)
+
+@item Syntax highlighting (see TODO for that)
+
+@item Presentation/rendering/display functions for the contents of text buffers
+
+@end itemize
