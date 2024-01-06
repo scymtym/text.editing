@@ -354,6 +354,7 @@ bundle conditions for multiple sites in a single condition.
 
 @menu
 * Motion Operations::
+* Insertion Operations::
 @end menu
 
 @quotation note
@@ -382,4 +383,22 @@ the beginning of the sub-sequence.
 @defgena{back-to-indentation,text.editing} cursor
 Move @var{cursor} to the first column of the current line that contains
 a non-whitespace item.
+@end deffn
+
+@node Insertion Operations
+@subsection Insertion Operations
+
+@defgena{insert-item,text.editing} cursor item
+Insert @var{item} at @var{cursor}.
+@end deffn
+
+@defgena{insert-newline,text.editing} cursor
+Split the current line at the position of @var{cursor}.
+@end deffn
+
+@defgena{insert-items,text.editing} cursor items &key start end
+Insert the items in @var{items} at @var{cursor}.
+
+@var{start} and @var{end}, when supplied, select a sub-sequence of
+@var{items}.
 @end deffn

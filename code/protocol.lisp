@@ -287,3 +287,19 @@ CURSOR is an attached Cluffer cursor that should be moved.
 UNIT is a unit of movement such as `:item', `:word', `:expression'.
 
 DIRECTION is either `:forward' or `:backward'."))
+
+;;; Insertion Operations
+
+(defgeneric insert-item (cursor item)
+  (:documentation
+   "Insert ITEM at CURSOR."))
+
+(defgeneric insert-newline (cursor)
+  (:documentation
+   "Split the current line at the position of CURSOR."))
+
+(defgeneric insert-items (cursor items &key start end)
+  (:documentation
+   "Insert the items in ITEMS at CURSOR.
+
+START and END, when supplied, select a sub-sequence of ITEMS."))

@@ -32,7 +32,8 @@
                               (:file "site")
                               (:file "buffer-mixins")
                               ;; Operations
-                              (:file "motion"))))
+                              (:file "motion")
+                              (:file "insertion"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 

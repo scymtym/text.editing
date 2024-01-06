@@ -166,4 +166,11 @@
   (:export
    #:move
 
-   #:back-to-indentation))
+   #:back-to-indentation)
+
+  ;; Insertion
+  (:export
+   #:insert-item
+   #:insert-newline
+   #:insert-items
+   #:insert-string))
