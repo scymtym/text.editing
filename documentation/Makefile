@@ -6,7 +6,7 @@ NAME = text.editing
 
 SOURCES = $(NAME).texi $(wildcard chapter-*.texi)
 
-GENERATED = generated-version.texi # generated-chapter-changelog.texi
+GENERATED = generated-version.texi generated-chapter-equivalent-emacs-commands.texi # generated-chapter-changelog.texi
 
 FIGURES = $(wildcard *.png)
 
@@ -22,6 +22,16 @@ generated-version.texi: ../version-string.sexp
 	     --eval '(format t "@macro sysversion~%~A~%@end macro" (uiop:read-file-form "$<"))' \
 	     --quit                                                                             \
 	  > $@
+
+generated-chapter-equivalent-emacs-commands.texi: \
+  ../tools/generate-documentation.lisp            \
+  ../data/emacs-equivalence.sexp
+	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit     \
+	  --load "$(QUICKLISP_DIRECTORY)/setup.lisp"                         \
+	  --eval '(asdf:initialize-source-registry $(ASDF_SOURCE_REGISTRY))' \
+	  --eval '(asdf:load-system "text.editing")'                         \
+	  --load '../tools/generate-documentation.lisp'                      \
+	  --quit
 
 #generated-chapter-changelog.texi: ../changes.sexp ../tools/write-changelog.lisp
 #	$(SBCL) --script write-changelog.lisp > $@
