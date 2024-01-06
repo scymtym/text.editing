@@ -18,27 +18,40 @@
                                 (object    preferred-column-tracking-mixin))
   (setf (preferred-column object) (c:cursor-position new-value)))
 
+;;; Mixin class `operation-history-mixin'
+
+(defclass operation-history-mixin ()
+  ((%operation-history :reader   operation-history
+                       :initform (make-array 0 :adjustable t :fill-pointer 0))))
+
+(defmethod most-recent-operation ((site operation-history-mixin))
+  (let ((history (operation-history site)))
+    (unless (a:emptyp history)
+      (a:last-elt history))))
+
+(defmethod push-operation ((operation t) (site operation-history-mixin))
+  (vector-push-extend operation (operation-history site)))
+
 ;;; Class `site'
 
 (defclass site (pi:print-items-mixin
+                operation-history-mixin
                 preferred-column-tracking-mixin)
-  ((%point             :initarg  :point
-                       :accessor point)
-   (%mark              :initarg  :mark
-                       :accessor mark
-                       :initform nil)
-   (%mark-active-p     :initarg  :mark-active-p
-                       :accessor mark-active-p
-                       :initform nil)
-   (%mark-stack        :accessor mark-stack
-                       :type     list
-                       :initform '())
-   (%insertion-stack   :initarg  :insertion-stack
-                       :reader   insertion-stack
-                       :initform (make-instance 'insertion-stack))
+  ((%point           :initarg  :point
+                     :accessor point)
+   (%mark            :initarg  :mark
+                     :accessor mark
+                     :initform nil)
+   (%mark-active-p   :initarg  :mark-active-p
+                     :accessor mark-active-p
+                     :initform nil)
+   (%mark-stack      :accessor mark-stack
+                     :type     list
+                     :initform '())
    ;;
-   (%operation-history :reader   operation-history
-                       :initform (make-array 0 :adjustable t :fill-pointer 0))))
+   (%insertion-stack :initarg  :insertion-stack
+                     :reader   insertion-stack
+                     :initform (make-instance 'insertion-stack))))
 
 (defmethod shared-initialize :after ((instance   site)
                                      (slot-names t)

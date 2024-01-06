@@ -110,6 +110,13 @@
 
    #:preferred-column-tracking-mixin)
 
+  ;; Operation history protocol and mixin
+  (:export
+   #:most-recent-operation
+   #:push-operation
+
+   #:operation-history-mixin)
+
   ;; Site protocol and class
   (:export
    #:point ; also `setf'

@@ -123,6 +123,16 @@ between lines without moving within any line."))
   (:documentation
    "Set the column number in which the point of SITE should reside by default to NEW-VALUE."))
 
+;;; Operation history protocol
+
+(defgeneric most-recent-operation (site)
+  (:documentation
+   "Return the most recent operation of SITE or `nil'."))
+
+(defgeneric push-operation (operation site)
+  (:documentation
+   "Push OPERATION into the operation history of SITE."))
+
 ;;; Site protocol
 ;;;
 ;;; Includes the detach protocol
