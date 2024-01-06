@@ -47,4 +47,9 @@
    #:delete-item-backward
 
    #:clone-cursor
-   #:clone-initargs))
+   #:clone-initargs)
+
+  ;; Predicates
+  (:export
+   #:punctuationp
+   #:whitespacep))

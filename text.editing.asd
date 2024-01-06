@@ -22,7 +22,9 @@
                               (:file "conditions")
 
                               (:file "line-utilities")
-                              (:file "cursor-utilities"))))
+                              (:file "cursor-utilities")
+
+                              (:file "predicates"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
