@@ -57,4 +57,148 @@
   features. Proper documentation can be found in the
   file:documentation directory.
 
-* TODO Usage Overview
+* Usage Overview
+
+  Using this library typically requires a buffer class defined by the
+  client which includes the desired mixin classes. For example
+
+  #+BEGIN_SRC lisp :exports both :results value verbatim :wrap EXAMPLE
+    (defclass my-buffer (text.editing:multiple-site-mixin
+                         text.editing:site-mixin
+                         cluffer-standard-buffer:buffer)
+      ())
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  #<STANDARD-CLASS COMMON-LISP-USER::MY-BUFFER>
+  #+END_EXAMPLE
+
+  This buffer class is like a Cluffer buffer but also has a primary
+  and zero or more additional sites. Creating an instance of the
+  buffer class automatically creates the primary site an attaches its
+  point cursor to the initial line of the buffer:
+
+  #+BEGIN_SRC lisp :exports both :results output verbatim :wrap EXAMPLE
+    (defvar *my-buffer*
+      (make-instance 'my-buffer :initial-line (make-instance 'cluffer-standard-line:closed-line)))
+
+    (print *my-buffer*)
+    (print (text.editing:site *my-buffer*))
+    (print (text.editing:sites *my-buffer*))
+    (print (text.editing:point (text.editing:site *my-buffer*)))
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+
+  #<MY-BUFFER 1 line 0 items {1006791483}>
+  #<SITE 0:0 {1006B03D03}>
+  (#<SITE 0:0 {1006B03D03}>)
+  #<CLUFFER-STANDARD-LINE:RIGHT-STICKY-CURSOR 0:0 {1006D4EDC3}>
+  #+END_EXAMPLE
+
+  This buffer instance is usable with the operations provided by this
+  library:
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (defvar *point* (text.editing:point *my-buffer*))
+    (setf (text.editing:items *point* text.editing:buffer :forward)
+          (format nil "one~%two!~%three~%"))
+    (defun summary ()
+      (values (coerce (text.editing:items *point* text.editing:buffer :forward) 'string)
+              (text.editing:sites *my-buffer*)))
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+  two!
+  three
+  "
+  (#<SITE 3:0 {1006B03D03}>)
+  #+END_EXAMPLE
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (text.editing:change-case *point* text.editing:word :backward :up)
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+  two!
+  THREE
+  "
+  (#<SITE 2:0 {1006B03D03}>)
+  #+END_EXAMPLE
+
+  While many operations can be applied directly to a cursor, it is
+  preferable use to the "operation protocol" and let the library
+  figure out how and to which object to apply the operation in
+  question:
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (text.editing:perform *my-buffer* 'text.editing:move text.editing:word :backward)
+    (text.editing:perform *my-buffer* 'text.editing:delete text.editing:line :forward)
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+
+  THREE
+  "
+  (#<SITE 1:0 {1006B03D03}>)
+  #+END_EXAMPLE
+
+  The deleted word is now in the insertion stack (which is like the
+  "kill ring" in Emacs) and can be inserted:
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (loop :repeat 3 :do (text.editing:perform *my-buffer* 'text.editing:yank :forward))
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+  two!two!two!
+  THREE
+  "
+  (#<SITE 1:12 {1006B03D03}>)
+  #+END_EXAMPLE
+
+  It is easy to see how the operation protocol comes into play when
+  multiple sites are used:
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (text.editing:push-site-relative *my-buffer* text.editing:line :forward)
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+  two!two!two!
+  THREE
+  "
+  (#<SITE 1:12 {1006B03D03}> #<SITE 2:5 {100AE016D3}>)
+  #+END_EXAMPLE
+
+  #+BEGIN_SRC lisp :exports both :results values verbatim :wrap EXAMPLE
+    (text.editing:perform *my-buffer* 'text.editing:move text.editing:line-boundary :backward)
+    (text.editing:perform *my-buffer* 'text.editing:change-case text.editing:word :forward :capital)
+    (summary)
+  #+END_SRC
+
+  #+RESULTS:
+  #+BEGIN_EXAMPLE
+  "one
+  Two!two!two!
+  Three
+  "
+  (#<SITE 1:3 {1006B03D03}> #<SITE 2:5 {100AE016D3}>)
+  #+END_EXAMPLE
