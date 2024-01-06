@@ -8,6 +8,9 @@
   (:use
    #:cl)
 
+  (:shadow
+   #:delete)
+
   (:local-nicknames
    (#:a  #:alexandria)
    (#:pi #:utilities.print-items)
@@ -173,4 +176,12 @@
    #:insert-item
    #:insert-newline
    #:insert-items
-   #:insert-string))
+   #:insert-string)
+
+  ;; Deletion
+  (:export
+   #:delete
+
+   #:delete-indentation
+   #:delete-trailing-whitespace
+   #:fixup-whitespace))

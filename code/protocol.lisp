@@ -303,3 +303,37 @@ DIRECTION is either `:forward' or `:backward'."))
    "Insert the items in ITEMS at CURSOR.
 
 START and END, when supplied, select a sub-sequence of ITEMS."))
+
+;;; Deletion operations
+
+(defgeneric delete (cursor unit direction)
+  (:documentation
+   "Delete items from CURSOR in DIRECTION for one UNIT.
+
+CURSOR is an attached Cluffer cursor.
+
+UNIT is a unit of movement such as `item', `word', `expression'.
+
+DIRECTION is either `:forward' or `:backward'."))
+
+(defgeneric delete-indentation (cursor)
+  (:documentation
+   "Join previous and current line, delete whitespace before and after CURSOR.
+
+Keep a single space character unless the delete placed CURSOR on an
+empty line."))
+
+(defgeneric delete-trailing-whitespace (cursor)
+  (:documentation
+   "Delete trailing whitespace from buffer lines.
+
+CURSOR determines the first line to be processed. All subsequent lines
+to the end of the buffer are processed after that."))
+
+(defgeneric fixup-whitespace (cursor)
+  (:documentation
+   "Delete consecutive whitespace before and after CURSOR in the
+current line.
+
+Keep a single space character unless the deletion placed CURSOR at the
+beginning of the line."))

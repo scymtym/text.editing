@@ -355,6 +355,7 @@ bundle conditions for multiple sites in a single condition.
 @menu
 * Motion Operations::
 * Insertion Operations::
+* Deletion Operations::
 @end menu
 
 @quotation note
@@ -401,4 +402,42 @@ Insert the items in @var{items} at @var{cursor}.
 
 @var{start} and @var{end}, when supplied, select a sub-sequence of
 @var{items}.
+@end deffn
+
+@node Deletion Operations
+@subsection Deletion Operations
+
+@defgena{delete,text.editing} cursor unit direction
+Delete the sub-sequence of buffer items indicated by @var{cursor},
+@var{unit} and @var{direction}.
+
+@var{cursor} is an attached Cluffer cursor.
+
+@var{unit} is a unit of movement such as @ref{unit-item,item},
+@ref{unit-word,word} or @t{expression}.
+
+@var{direction} is either @t{:forward} or @t{:backward}.
+@end deffn
+
+@defgena{delete-indentation,text.editing} cursor
+Join previous and current line, delete whitespace before and after
+@var{cursor}.
+
+Keep a single space character unless the delete placed @var{cursor} on
+an empty line.
+@end deffn
+
+@defgena{delete-trailing-whitespace,text.editing} cursor
+Delete trailing whitespace from buffer lines.
+
+@var{cursor} determines the first line to be processed.  All subsequent
+lines to the end of the buffer are processed after that.
+@end deffn
+
+@defgena{fixup-whitespace,text.editing} cursor
+Delete consecutive whitespace before and after @var{cursor} in the
+current line.
+
+Keep a single space character unless the deletion placed @var{cursor} at
+the beginning of the line.
 @end deffn
