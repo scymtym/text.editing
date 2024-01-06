@@ -481,3 +481,15 @@ is obtained by cloning CURSOR and applying (move C2 UNIT
 DIRECTION). The case of an item is changed by calling `char-downcase'
 if CASE is `:down', `char-upcase' if CASE is `:up' and in a fashion
 analogous to `string-capitalize' if CASE is `:capital'."))
+
+;;; Transposing operations
+
+(defgeneric transpose (cursor unit direction)
+  (:documentation
+   "Exchange the sequences of items defined by UNIT before and after CURSOR.
+
+If CURSOR is within a UNIT, it is first moved to the boundary of that
+UNIT according to DIRECTION.
+
+DIRECTION is either `:forward' or `:backward' and controls where CURSOR
+is positioned after the operation."))

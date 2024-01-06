@@ -361,6 +361,7 @@ bundle conditions for multiple sites in a single condition.
 * Marking Operations::
 * Copy and Yank Operations::
 * Case Changing Operations::
+* Transposing Operations::
 @end menu
 
 @quotation note
@@ -621,4 +622,18 @@ The case of an item is changed by calling @t{cl:char-downcase} if
 @var{case} is @t{:down}, @t{cl:char-upcase} if @var{case} is @t{:up} and
 in a fashion analogous to @t{cl:string-capitalize} if @var{case} is
 @t{capital}.
+@end deffn
+
+@node Transposing Operations
+@subsection Transposing Operations
+
+@defgena{transpose,text.editing} cursor unit direction
+Exchange the sequences of items defined by @var{unit} before and after
+@var{cursor}.
+
+If @var{cursor} is within a @var{unit}, it is first moved to the
+boundary of that @var{unit} according to @var{direction}.
+
+@var{direction} is either @t{:forward} or @t{:backward} and controls
+where @var{cursor} is positioned after the operation.
 @end deffn

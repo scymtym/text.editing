@@ -216,4 +216,5 @@
 
   ;; Modification
   (:export
-   #:change-case))
+   #:change-case
+   #:transpose))
