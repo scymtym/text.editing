@@ -27,6 +27,13 @@
    #:editing-condition
 
    #:site-condition
+   #:site
+
+   #:mark-not-set-error
+
+   #:mark-not-active-error
+
+   #:mark-stack-empty-error
 
    #:insertion-stack-empty-error
 
@@ -190,4 +197,14 @@
   (:export
    #:map-items
    #:items) ; also `setf'
-  )
+
+  ;; Marking
+  (:export
+   #:mark-or-error
+   #:activate-mark
+   #:deactivate-mark
+   #:set-mark
+   #:set-mark-or-toggle-active
+   #:pop-mark
+   #:exchange-point-and-mark
+   #:mark-object))

@@ -354,3 +354,86 @@ indicated by CURSOR, UNIT and DIRECTION."))
   (:documentation
    "Replace the sub-sequence of buffer items indicated by CURSOR,
 UNIT and DIRECTION by the items in the `cl:sequence' NEW-VALUE."))
+
+;;; Marking Operations
+
+(defgeneric mark-or-error (object)
+  (:documentation
+   "Return the mark cursor of OBJECT or signal an error.
+
+If the mark cursor of OBJECT is not set, signal an error of type
+MARK-NOT-SET-ERROR."))
+
+(defgeneric activate-mark (site)
+  (:documentation
+   "Set the state of the mark cursor of SITE to active.
+
+Signal an error of type `mark-not-set-error' if the mark of SITE is
+not set."))
+
+(defgeneric deactivate-mark (site)
+  (:documentation
+   "Set the state of the mark cursor of SITE to inactive."))
+
+(defgeneric set-mark (site)
+  (:documentation
+   "Set the mark cursor of SITE to the position of the point cursor.
+
+Push the current mark cursor, if any, onto the mark stack, set a new
+mark cursor and move it to the position of the point cursor. Activate
+the mark.
+
+Return the new mark cursor."))
+
+(defgeneric set-mark-or-toggle-active (site)
+  (:documentation
+   "Set the mark cursor of SITE or toggle its active state.
+
+If the previous command was not `set-mark-or-toggle-active', then push
+the current mark cursor of SITE onto the mark stack, set a new mark
+cursor and move it to the position of the point cursor.
+
+If the previous command was `set-mark-or-toggle-active', then toggle
+the active state of the mark cursor of SITE.
+
+Return two values: a Boolean which indicates whether a new mark cursor
+was set and another Boolean which indicates whether the mark is
+active."))
+
+(defgeneric pop-mark (site)
+  (:documentation
+   "Pop a mark off the mark stack of SITE and move the point cursor to it.
+
+Destroy the current mark of SITE, if any.
+
+Return the popped mark cursor.
+
+Signal an error of type `mark-stack-empty' if the mark stack of SITE
+is empty."))
+
+(defgeneric exchange-point-an-dmark (site)
+  (:documentation
+   "Exchange the locations of point and mark of SITE.
+
+Signal an error of type `mark-not-set-error' if the mark of SITE is
+not set."))
+
+(defgeneric mark-object (site unit direction)
+  (:documentation
+   "Set region of SITE according to UNIT and DIRECTION.
+
+Leave the point cursor of SITE at its current location. Ensure the
+mark is set and active (see below) and move the mark cursor according
+to UNIT and DIRECTION.
+
+If the mark of SITE is not set, set a new mark cursor at the location
+of the point cursor and activate it. Then apply the motion according
+to UNIT and DIRECTION.
+
+If the mark of SITE is set but not active, activate the mark cursor
+and move it to the location of the point cursor. Then apply the motion
+according to UNIT and DIRECTION.
+
+If the mark of SITE is set and active, just apply the motion according
+to UNIT and DIRECTION. This last case allows extending the region by
+marking subsequent objects."))

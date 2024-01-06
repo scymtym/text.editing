@@ -89,7 +89,8 @@
                               (point-column 0            point-column-supplied?))
   (multiple-value-bind (content1 point-line-number point-column-number killed)
       (parse-state state-designator)
-    (multiple-value-bind (content mark-line-number mark-column-number)
+    (multiple-value-bind (content
+                          mark-line-number mark-column-number mark-active-p)
         (parse-mark-state content1)
       (let* ((effective-line   (if point-line-supplied?
                                    point-line
@@ -111,6 +112,10 @@
         (when (or effective-line effective-column)
           (e:move-cursor-to-line
            (e:point site) effective-line effective-column))
+        (when mark-line-number
+          (let ((mark (e:set-mark site)))
+            (e:move-cursor-to-line mark mark-line-number mark-column-number)
+            (setf (e:mark-active-p site) mark-active-p)))
         ;; Insertion stack
         (when killed
           (let ((stack (e:insertion-stack site)))
@@ -275,6 +280,8 @@
          (signals cluffer:beginning-of-buffer (do-it)))
         (cluffer:end-of-buffer
          (signals cluffer:end-of-buffer (do-it)))
+        (e:mark-not-set-error
+         (signals e:mark-not-set-error (do-it)))
         (e:insertion-stack-empty-error
          (signals e:insertion-stack-empty-error (do-it)))
         (t

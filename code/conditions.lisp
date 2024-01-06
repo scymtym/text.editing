@@ -15,6 +15,35 @@
   (:default-initargs
    :site (a:required-argument :site)))
 
+;;; Mark
+
+(define-condition mark-not-set-error (site-condition
+                                      error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The mark is not set in ~A.~@:>"
+             (site condition)))))
+
+(define-condition mark-not-active-error (site-condition
+                                         error)
+  ((%mark :initarg :mark
+          :reader  %mark))
+  (:default-initargs
+   :mark (a:required-argument :mark))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The mark ~A is not active in ~A.~@:>"
+             (%mark condition) (site condition)))))
+
+(define-condition mark-stack-empty-error (site-condition
+                                          error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The mark stack is empty in ~A.~@:>"
+             (site condition)))))
+
 ;;; Insertion stack
 
 (define-condition insertion-stack-empty-error (site-condition

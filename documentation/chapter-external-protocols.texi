@@ -357,6 +357,7 @@ bundle conditions for multiple sites in a single condition.
 * Insertion Operations::
 * Deletion Operations::
 * Items Functions::
+* Marking Operations::
 @end menu
 
 @quotation note
@@ -463,4 +464,104 @@ indicated by @var{cursor}, @var{unit} and @var{direction}.
 Replace the sub-sequence of buffer items indicated by @var{cursor},
 @var{unit} and @var{direction} by the items in the @t{cl:sequence}
 @var{new-value}.
+@end deffn
+
+@node Marking Operations
+@subsection Marking Operations
+
+The mark protocol contains operations for managing different aspects of
+the @ref{term-mark,mark} cursor of a @ref{term-site,site}:
+
+@itemize
+@item
+The mark cursor can be set or not.
+
+@item
+A set mark cursor can be active or inactive.  When the mark is active,
+the point cursor and mark cursor define the @ref{term-region,region} of
+the site.
+
+@item
+A mark stack stores previous locations of the mark cursor.
+@end itemize
+
+@defgena{mark-or-error,text.editing} object
+Return the mark cursor of @var{object} or signal an error.
+
+If the mark cursor of @var{object} is not set, signal an error of type
+@t{mark-not-set-error}.
+@end deffn
+
+@defgena{activate-mark,text.editing} site
+Set the state of the mark cursor of @var{site} to active.
+
+Signal an error of type @t{mark-not-set-error} if the mark of @var{site}
+is not set.
+@end deffn
+
+@defgena{deactivate-mark,text.editing} site
+Set the state of the mark cursor of @var{site} to inactive.
+@end deffn
+
+@defgena{set-mark,text.editing} site
+Set the mark cursor of @var{site} to the position of the point cursor.
+
+Push the current mark cursor, if any, onto the mark stack, set a new
+mark cursor and move it to the position of the point cursor. Activate
+the mark.
+
+Return the new mark cursor.
+@end deffn
+
+@defgena{set-mark-or-toggle-active,text.editing} site
+Set the mark cursor of @var{site} or toggle its active state.
+
+If the previous command was not @command{set-mark-or-toggle-active},
+then push the current mark cursor of @var{site} onto the mark stack, set
+a new mark cursor and move it to the position of the point cursor.
+
+If the previous command was @command{set-mark-or-toggle-active}, then
+toggle the active state of the mark cursor of @var{site}.
+
+Return two values: a Boolean which indicates whether a new mark cursor
+was set and another Boolean which indicates whether the mark is active.
+@end deffn
+
+@defgena{pop-mark,text.editing} site
+Pop a mark off the mark stack of @var{site} and move the point cursor
+to it.
+
+Destroy the current mark of @var{site}, if any.
+
+Return the popped mark cursor.
+
+Signal an error of type @t{mark-stack-empty} if the mark stack of
+@var{site} is empty.
+@end deffn
+
+@defgena{exchange-point-and-mark,text.editing} site
+Exchange the locations of point and mark of @var{site}.
+
+Signal an error of type @t{mark-not-set-error} if the mark of @var{site}
+is not set.
+@end deffn
+
+@defgena{mark-object,text.editing} site unit direction
+Set region of @var{site} according to @var{unit} and @var{direction}.
+
+Leave the point cursor of @var{site} at its current location.  Ensure
+the mark is set and active (see below) and move the mark cursor
+according to @var{unit} and @var{direction}.
+
+If the mark of @var{site} is not set, set a new mark cursor at the
+location of the point cursor and activate it.  Then apply the motion
+according to @var{unit} and @var{direction}.
+
+If the mark of @var{site} is set but not active, activate the mark
+cursor and move it to the location of the point cursor.  Then apply the
+motion according to @var{unit} and @var{direction}.
+
+If the mark of @var{site} is set and active, just apply the motion
+according to @var{unit} and @var{direction}.  This last case allows
+extending the region by marking subsequent objects.
 @end deffn

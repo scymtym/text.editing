@@ -71,6 +71,16 @@ For example, the @t{move} operation changes the buffer positions of the
 point cursors of all sites according to the specified @var{unit} and
 @var{direction} arguments.
 
+@item Region
+
+@cindex region
+If a @ref{term-site,site} has an active @ref{term-mark,mark} cursor, the
+sequence of items between the @ref{term-point,point} cursor and the mark
+cursor forms the @anchor{term-region} @dfn{region}.  Operations can be
+performed on the region.  The specified sequence of items is the same
+regardless of which of the two cursors is closer to the beginning of the
+buffer.
+
 @item Unit
 
 @cindex unit
