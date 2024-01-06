@@ -21,3 +21,24 @@
   (:method-combination append)
   (:method append ((cursor c:cursor))
     '()))
+
+;;; Unit protocol
+
+(defgeneric apply-from-cursor (continuation cursor unit direction)
+  (:documentation
+   "Repeatedly call CONTINUATION until CURSOR has processed one UNIT in DIRECTION.
+
+CONTINUATION is a function the lambda list of which has to be
+compatible with
+
+  (cursor item)
+
+UNIT is the unit in or at or around TARGET that CONTINUATION should be
+applied to. Examples of units are items, words, lines and paragraphs.
+
+DIRECTION is the direction in which the processing should be performed
+from or around TARGET. Possible values are `:forward' and `:backward'."))
+
+(defgeneric item-transformer (transform direction)
+  (:documentation
+   "Return a function that transforms items via TRANSFORM."))

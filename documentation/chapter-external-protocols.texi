@@ -1,2 +1,48 @@
 @node External Protocols
 @chapter External Protocols
+
+@menu
+* Unit Protocol::
+@end menu
+
+This chapter describes the external protocols provided by the @sysname{} library.
+
+@node Unit Protocol
+@section Unit Protocol
+
+@defgena{apply-from-cursor,text.editing} continuation cursor unit direction
+Repeatedly call @var{continuation} until the sub-sequence of buffer
+items indicated by @var{cursor}, @var{unit} and @var{direction} has been
+processed.
+
+@var{continuation} is a function the lambda list of which has to be
+compatible with @code{(cursor item)}.  The function will be called for
+each item in the indicated sub-sequence with a cursor that is positioned
+before or after the item as the first argument and the item as the
+second argument.  @var{cursor} is positioned before @var{item} if
+@var{direction} is @t{:forward} and after @var{item} if @var{direction}
+is @t{:backward}.
+
+@var{unit} is the unit in or at or around @var{cursor} that
+@var{continuation} should be applied to.  Examples of units are
+@ref{unit-item,item}, @ref{unit-line,line}, @ref{unit-word,word} and
+@ref{unit-paragraph,paragraph}.
+
+@var{direction} is the direction in which the processing should be
+performed from or around @var{cursor}.  Possible values are @t{:forward}
+and @t{:backward}.
+@end deffn
+
+@defgena{item-transformer,text.editing} transform direction
+Return a function that transforms items via @var{transform} when passed
+to @ref{Generic-Function text.editing|apply-from-cursor, apply-from-cursor}.
+
+@var{transform} is a function that accepts an item as its sole argument
+and returns an item (either the item passed to it or a new item).
+
+@var{direction} specifies the direction for which the returned function
+will be valid.  In other words, when the returned function is passed to
+@ref{Generic-Function text.editing|apply-from-cursor, apply-from-cursor},
+that call has to use the same value for the @var{direction} argument as
+the call to this function.
+@end deffn

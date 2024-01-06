@@ -52,4 +52,29 @@
   ;; Predicates
   (:export
    #:punctuationp
-   #:whitespacep))
+   #:whitespacep)
+
+  ;; Unit protocol
+  (:export
+   #:apply-from-cursor
+   #:item-transformer)
+
+  ;; Units
+  (:export
+   #:unit
+   #:all-units
+
+   #:region-unit
+   #:region
+   #:region-or
+   #:fallback ; reader
+
+   #:item
+   #:region-or-item
+
+   #:line   #:semi-line   #:line-boundary
+   #:buffer #:semi-buffer #:buffer-boundary
+
+   #:word
+   #:sentence
+   #:paragraph))

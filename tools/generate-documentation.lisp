@@ -3,7 +3,9 @@
    #:cl)
 
   (:local-nicknames
-   (#:a    #:alexandria)))
+   (#:a    #:alexandria)
+
+   (#:edit #:text.editing)))
 
 (cl:in-package #:text.editing.generate-documentation)
 
@@ -19,6 +21,67 @@
                 (#\{ (write-string "@{" stream))
                 (#\} (write-string "@}" stream))
                 (t   (write-char character stream))))))
+
+;;; Unit descriptions and unit graph
+
+(defun emit-unit-description (unit)
+  (let* ((class            (class-of unit))
+         (superclasses     (sb-mop:class-direct-superclasses class))
+         (name             (class-name class))
+         (superclass-names (mapcar #'class-name superclasses))
+         (documentation    (or (documentation class t)
+                               "@emph{not documented}")))
+    (format t "@item~%")
+    (format t "@tindex ~(~A~)~%" name)
+    (format t "@cindex ~(~A~) unit~%" name)
+    (format t "@anchor{unit-~(~A~)}~:*@t{~(~A~)} @tab ~{~(~A~)~^, ~}@tab ~A~2%"
+            name superclass-names documentation)))
+
+(defun emit-unit-descriptions ()
+  (a:with-output-to-file (*standard-output* "generated-builtin-units.texi"
+                                            :if-exists :supersede)
+    (let ((title "Built-in Units"))
+      (emit-section title :level "subsection")
+      (format t "@multitable @columnfractions .2 .2 .6~%")
+      (format t "@headitem Name @tab Super-units @tab Description~%")
+      (let ((sorted (sort (copy-list (edit:all-units)) #'string<
+                          :key (a:compose #'class-name #'class-of))))
+        (mapc #'emit-unit-description sorted))
+      (format t "~2%@end multitable~2%")
+      ;;
+      (emit-unit-graph *standard-output*))))
+
+(defstruct node value children)
+
+(defun emit-unit-graph (stream)
+  (let ((remaining (edit:all-units))
+        (by-class  (make-hash-table :test #'eq)))
+    (labels ((add (unit-class)
+               (or (gethash unit-class by-class)
+                   (let ((node (make-node :value unit-class)))
+                     (a:removef remaining unit-class :key #'class-of)
+                     (setf (gethash unit-class by-class) node)
+                     (mapc (lambda (subclass)
+                             (let ((sub-node (add subclass)))
+                               (push sub-node (node-children node))))
+                           (sb-mop:class-direct-subclasses unit-class))
+                     node))))
+      (let* ((unit (find-class 'edit:unit))
+             (root (add unit)))
+        (unless (null remaining)
+          (error "~@<Missed unit~P ~{~A~^, ~}.~@:>"
+                 (length remaining) remaining))
+        (format stream "@verbatim~%")
+        (utilities.print-tree:print-tree
+         *standard-output* root
+         (utilities.print-tree:make-node-printer
+          (lambda (stream depth node)
+            (declare (ignore depth))
+            (princ (class-name (node-value node)) stream))
+          nil #'node-children))
+        (format stream "~&@end verbatim~%")))))
+
+(emit-unit-descriptions)
 
 ;;; Emacs equivalence
 

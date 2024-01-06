@@ -24,7 +24,8 @@
                               (:file "line-utilities")
                               (:file "cursor-utilities")
 
-                              (:file "predicates"))))
+                              (:file "predicates")
+                              (:file "unit"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 

@@ -1,2 +1,61 @@
 @node Concepts
 @chapter Concepts
+
+@menu
+* Units::
+@end menu
+
+This section defines a few concepts that are important for the
+@sysname{} library and describes how they related to each other.
+
+@table @dfn
+
+@item Unit
+
+@cindex unit
+@anchor{term-unit} @dfn{Units} are a way to designate particular
+sub-sequences of the sequence of all items in a buffer, often relative
+to the point cursor.  For example, the @t{word} unit refers to a
+sequence of non-whitespace, non-punctuation characters that follow (or
+precede depending on the specified direction) the point cursor.
+
+@end table
+
+@node Units
+@section Units
+
+@menu
+* Built-in Units::
+@end menu
+
+Sites, units and operations are the basic concepts from which most
+desired behaviors can be constructed.  Here are a few examples:
+
+@multitable @columnfractions .15 .15 .15 .15 .4
+@headitem Operation @tab Unit @tab Direction   @tab Arguments    @tab Equivalent Emacs command
+@item     move        @tab item @tab forward   @tab              @tab @t{forward-char}                (@kbd{C-f})
+@item     move        @tab item @tab backward  @tab              @tab @t{backward-char}               (@kbd{C-b})
+@item     move        @tab word @tab forward   @tab              @tab @t{forward-word}                (@kbd{M-f})
+@item     move        @tab word @tab backward  @tab              @tab @t{backward-word}               (@kbd{M-b})
+@item     move        @tab line @tab forward   @tab              @tab @t{next-line}                   (@kbd{C-n})
+@item     move        @tab line @tab backward  @tab              @tab @t{previous-line}               (@kbd{C-p})
+
+@item     delete      @tab item @tab forward   @tab              @tab @t{delete-char}                 (@kbd{C-d})
+@item     delete      @tab item @tab backward  @tab              @tab @t{delete-backward-char}        (@kbd{<backspace>})
+@item     delete      @tab word @tab forward   @tab              @tab @t{kill-word}                   (@kbd{M-d})
+@item     delete      @tab word @tab backward  @tab              @tab @t{backward-kill-word}          (@kbd{M-<backspace>})
+@item     delete      @tab line @tab forward   @tab              @tab @t{kill-line}                   (@kbd{C-k})
+@item     delete      @tab line @tab backward  @tab              @tab @t{kill-line} with @t{0} prefix (@kbd{C-0 C-k})
+
+@item     change-case @tab word @tab forward   @tab @t{:capital} @tab @t{capitalize-word}             (@kbd{M-c})
+@end multitable
+
+The key observation is that operations, units and directions are mostly
+orthogonal.  In other words, new operations and units that are defined
+independently should still work together just fine in most cases.  This
+relative independence is achieved via the
+@ref{Generic-Function text.editing|apply-from-cursor, apply-from-cursor function}
+which applies a given item-wise operation to a sub-sequence of buffer
+items specified as a unit and a direction.
+
+@include generated-builtin-units.texi
