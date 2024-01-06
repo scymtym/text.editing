@@ -61,6 +61,16 @@ specify a region within the buffer on which operations can be performed.
 
 The mark cursor of a site can either @dfn{active} or @dfn{inactive}.
 
+@item Operation
+
+@cindex operation
+An @dfn{operation} changes the buffer content and/or state of sites in a
+particular way, usually depending on the values of one or more parameters.
+
+For example, the @t{move} operation changes the buffer positions of the
+point cursors of all sites according to the specified @var{unit} and
+@var{direction} arguments.
+
 @item Unit
 
 @cindex unit

@@ -18,6 +18,15 @@
                                 (object    preferred-column-tracking-mixin))
   (setf (preferred-column object) (c:cursor-position new-value)))
 
+(defmethod perform :after ((target    preferred-column-tracking-mixin)
+                           (operation t)
+                           &rest operation-arguments)
+  (unless (and (eq operation 'move)
+               (destructuring-bind (unit &rest rest) operation-arguments
+                 (declare (ignore rest))
+                 (typep unit 'line)))
+    (setf (preferred-column target) (c:cursor-position (point target)))))
+
 ;;; Mixin class `operation-history-mixin'
 
 (defclass operation-history-mixin ()
@@ -30,7 +39,13 @@
       (a:last-elt history))))
 
 (defmethod push-operation ((operation t) (site operation-history-mixin))
+  ;; TODO should this be unbounded?
   (vector-push-extend operation (operation-history site)))
+
+(defmethod perform :around ((target operation-history-mixin) (operation t)
+                            &rest operation-arguments)
+  (call-next-method)
+  (push-operation (list* operation operation-arguments) target))
 
 ;;; Mixin class `site-data-mixin'
 

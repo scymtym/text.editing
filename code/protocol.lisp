@@ -230,3 +230,46 @@ The returned count includes the primary site."))
 (defgeneric remove-other-sites (buffer)
   (:documentation
    "Remove all secondary sites from BUFFER."))
+
+;;; Operation protocol
+
+(defgeneric perform (target operation &rest operation-arguments)
+  (:documentation
+   "Perform OPERATION with OPERATION-ARGUMENTS in or on TARGET.
+
+TARGET is the object in or at or on which the operation should be
+performed such as a buffer or a cursor.
+
+OPERATION designates a function which performs the desired operation
+when called with a target object (not necessarily TARGET) as the first
+argument. The target object in the call to OPERATION may be different
+from TARGET when methods on this generic function translate an
+operation on one target object to one or more operations on other
+target objects. For example, an operation on a buffer is commonly
+translated to one operation on each site of the buffer and further to
+one operation on the point cursor of each site of the buffer.
+
+OPERATION-ARGUMENTS is a list of additional arguments that should be
+passed to the function designated by OPERATION.
+
+This function generally returns the values returned by the OPERATION
+call. Similarly, calls to this function may signal any condition that
+may be signaled by the OPERATION call. However, if TARGET is a buffer
+and multiple sites exist, a different convention may be used in order
+to return one result for each site or bundle conditions for multiple
+sites in a single condition."))
+
+;;; Default behavior
+
+(defmethod perform ((target c:buffer) (operation t) &rest operation-arguments)
+  (apply #'perform (site target) operation operation-arguments))
+
+(defmethod perform ((target c:cursor) (operation t) &rest operation-arguments)
+  (apply operation target operation-arguments))
+
+(defmacro operates-on-site (operation)
+  `(defmethod perform ((target site) (operation (eql ',operation))
+                       &rest operation-arguments)
+     ;; Call the operation with the site instead of the point cursor of
+     ;; the site.
+     (apply (function ,operation) target operation-arguments)))

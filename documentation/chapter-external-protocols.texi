@@ -10,6 +10,7 @@
 * Site Protocol::
 * Buffer Protocol::
 * Multiple Sites Protocol::
+* Operation Protocol::
 @end menu
 
 This chapter describes the external protocols provided by the @sysname{} library.
@@ -315,4 +316,34 @@ except the primary site.
 
 @defgena{remote-other-sites,text.editing} buffer
 Remove all sites from @var{buffer} except the primary site.
+@end deffn
+
+@node Operation Protocol
+@section Operation Protocol
+
+@defgena{perform,text.editing} target operation @rest{} operation-arguments
+Perform @var{operation} with @var{operation-arguments} in or on @var{target}.
+
+@var{target} is the object in or at or on which the operation should be
+performed such as a buffer or a cursor.
+
+@var{operation} designates a function which performs the desired
+operation when called with a target object (not necessarily
+@var{target}) as the first argument.  The target object in the call to
+@var{operation} may be different from @var{target} when methods on this
+generic function translate an operation on one target object to one or
+more operations on other target objects.  For example, an operation on a
+buffer is commonly translated to one operation on each
+@ref{term-site,site} of the buffer and further to one operation on the
+point cursor of each site of the buffer.
+
+@var{operation-arguments} is a list of additional arguments that should
+be passed to the function designated by @var{operation}.
+
+This function generally returns the values returned by the
+@var{operation} call.  Similarly, calls to this function may signal any
+condition that may be signaled by the @var{operation} call.  However, if
+@var{target} is a buffer and multiple sites exist, a different
+convention may be used in order to return one result for each site or
+bundle conditions for multiple sites in a single condition.
 @end deffn

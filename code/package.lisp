@@ -152,4 +152,8 @@
    #:rotate-sites
    #:remove-other-sites
 
-   #:multiple-site-mixin))
+   #:multiple-site-mixin)
+
+  ;; Operation protocol
+  (:export
+   #:perform))

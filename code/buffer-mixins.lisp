@@ -126,3 +126,14 @@
 
 (defmethod remove-other-sites ((buffer multiple-site-mixin))
   (mapc (a:rcurry #'remove-site buffer) (other-sites buffer)))
+
+;;; Operations
+
+(defmethod perform ((target multiple-site-mixin) (operation t)
+                    &rest operation-arguments)
+  ;; Distribute OPERATION to all sites. Each site typically delegates
+  ;; to its point cursor but some operations, like `yank', work on the
+  ;; level of sites, not cursors.
+  (map-sites (lambda (site)
+               (apply #'perform site operation operation-arguments))
+             target))
