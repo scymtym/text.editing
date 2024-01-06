@@ -184,4 +184,10 @@
 
    #:delete-indentation
    #:delete-trailing-whitespace
-   #:fixup-whitespace))
+   #:fixup-whitespace)
+
+  ;; Items functions
+  (:export
+   #:map-items
+   #:items) ; also `setf'
+  )

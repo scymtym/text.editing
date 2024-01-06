@@ -337,3 +337,20 @@ current line.
 
 Keep a single space character unless the deletion placed CURSOR at the
 beginning of the line."))
+
+;;; Items functions
+
+(defgeneric map-items (function cursor unit direction)
+  (:documentation
+   "Call FUNCTION with each item in the sub-sequence of buffer items
+indicated by CURSOR, UNIT and DIRECTION."))
+
+(defgeneric items (cursor unit direction)
+  (:documentation
+   "Return a `cl:sequence' containing the sub-sequence of buffer items
+indicated by CURSOR, UNIT and DIRECTION."))
+
+(defgeneric (setf items) (new-value cursor unit direction)
+  (:documentation
+   "Replace the sub-sequence of buffer items indicated by CURSOR,
+UNIT and DIRECTION by the items in the `cl:sequence' NEW-VALUE."))

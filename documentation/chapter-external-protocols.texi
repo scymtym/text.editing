@@ -356,6 +356,7 @@ bundle conditions for multiple sites in a single condition.
 * Motion Operations::
 * Insertion Operations::
 * Deletion Operations::
+* Items Functions::
 @end menu
 
 @quotation note
@@ -440,4 +441,26 @@ current line.
 
 Keep a single space character unless the deletion placed @var{cursor} at
 the beginning of the line.
+@end deffn
+
+@node Items Functions
+@subsection Items Functions
+
+The following convenience function allow easy retrieval and mutation of
+sub-sequences of buffer items:
+
+@defgena{map-items,text.editing} function cursor unit direction
+Call @var{function} with each item in the sub-sequence of buffer items
+indicated by @var{cursor}, @var{unit} and @var{direction}.
+@end deffn
+
+@defgena{items,text.editing} cursor unit direction
+Return a @t{cl:sequence} containing the sub-sequence of buffer items
+indicated by @var{cursor}, @var{unit} and @var{direction}.
+@end deffn
+
+@defgena{(setf items),text.editing} new-value cursor unit direction
+Replace the sub-sequence of buffer items indicated by @var{cursor},
+@var{unit} and @var{direction} by the items in the @t{cl:sequence}
+@var{new-value}.
 @end deffn
