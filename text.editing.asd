@@ -52,7 +52,11 @@
   :components  ((:module     "test"
                  :serial     t
                  :components ((:file "package")
-                              (:file "utilities"))))
+                              (:file "utilities")
+                              ;; Operations
+                              (:file "motion")
+                              (:file "insertion")
+                              (:file "deletion"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))
