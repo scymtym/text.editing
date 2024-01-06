@@ -70,7 +70,8 @@ the call to this function.
 
 This protocol allows querying and manipulating the entries of an
 insertion stack.  This protocol is not concerned with buffers, sites or
-cursors.
+cursors.  See @ref{Copy and Yank Operations} for a higher-level protocol
+on top of this one.
 
 @defclassa{insertion-stack-empty,text.editing}
 This error is signaled when an attempt is made to retrieve an entry from
@@ -358,6 +359,7 @@ bundle conditions for multiple sites in a single condition.
 * Deletion Operations::
 * Items Functions::
 * Marking Operations::
+* Copy and Yank Operations::
 @end menu
 
 @quotation note
@@ -564,4 +566,36 @@ motion according to @var{unit} and @var{direction}.
 If the mark of @var{site} is set and active, just apply the motion
 according to @var{unit} and @var{direction}.  This last case allows
 extending the region by marking subsequent objects.
+@end deffn
+
+@node Copy and Yank Operations
+@subsection Copy and Yank Operations
+
+The copy and yank protocol offers higher-level functions that implement
+typical copy and yank operations which abstract from the details of the
+lower-level @ref{Insertion Stack Protocol}.
+
+@defgena{yank,text.editing} site @pkey{} direction
+Insert top insertion stack entry of @var{site} at the point of
+@var{site}.
+
+Insert the items from the top entry of the insertion stack of @var{site}
+before or after the point cursor of @var{site}.
+
+@var{direction} controls whether the items are inserted before or after
+the point cursor, or equivalently, whether the point cursor moves to the
+beginning or end of the inserted items after the insertion.
+@end deffn
+
+@defgena{copy,text.editing} site unit direction
+Copy items according at @var{site} according to @var{unit} and
+@var{direction}.
+
+The items indicated by the point cursor of @var{site}, @var{unit} and
+@var{direction} are copied into either the current top entry of the
+insertion stack of @var{site} or a new entry that is first pushed onto
+the insertion stack.
+
+Whether a new entry should be created is decided according to an
+internal protocol that may be exported at some later time.
 @end deffn

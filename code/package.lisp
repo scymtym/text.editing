@@ -207,4 +207,9 @@
    #:set-mark-or-toggle-active
    #:pop-mark
    #:exchange-point-and-mark
-   #:mark-object))
+   #:mark-object)
+
+  ;; Copying
+  (:export
+   #:yank
+   #:copy))

@@ -437,3 +437,27 @@ according to UNIT and DIRECTION.
 If the mark of SITE is set and active, just apply the motion according
 to UNIT and DIRECTION. This last case allows extending the region by
 marking subsequent objects."))
+
+;;; Copy, kill and yank operations
+
+(defgeneric yank (site direction &key pop)
+  (:documentation
+   "Insert top insertion stack entry of SITE at the point of SITE.
+
+Insert the items from the top entry of the insertion stack of SITE
+before or after the point cursor of SITE.
+
+DIRECTION controls whether the items are inserted before or after the
+point cursor, or equivalently, whether the point cursor moves to the
+beginning or end of the inserted items after the insertion."))
+
+(defgeneric copy (site unit direction)
+  (:documentation
+   "Copy items according at SITE according to UNIT and DIRECTION.
+
+The items indicated by the point cursor of SITE, UNIT and DIRECTION
+are copied into either the current top entry of the insertion stack of
+SITE or a new entry that is first pushed onto the insertion stack.
+
+Whether a new entry should be created is decided according to an
+internal protocol that may be exported at some later time."))

@@ -36,7 +36,8 @@
                               (:file "insertion")
                               (:file "deletion")
                               (:file "items")
-                              (:file "marking"))))
+                              (:file "marking")
+                              (:file "copying"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
@@ -58,7 +59,8 @@
                               (:file "motion")
                               (:file "insertion")
                               (:file "deletion")
-                              (:file "marking"))))
+                              (:file "marking")
+                              (:file "copying"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))
