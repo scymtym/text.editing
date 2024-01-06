@@ -461,3 +461,23 @@ SITE or a new entry that is first pushed onto the insertion stack.
 
 Whether a new entry should be created is decided according to an
 internal protocol that may be exported at some later time."))
+
+;;; Case changing operations
+
+(defgeneric change-case (cursor unit direction case)
+  (:documentation
+   "Change the case of items to CASE from CURSOR in DIRECTION for one UNIT.
+
+CURSOR is an attached Cluffer cursor.
+
+UNIT is a unit of movement such as `item', `word', or `expression'.
+
+DIRECTION is either `:forward' or `:backward'.
+
+CASE is one of `:down', `:up' and `:capital'.
+
+Change the case of items between CURSOR and a fictional cursor C2 that
+is obtained by cloning CURSOR and applying (move C2 UNIT
+DIRECTION). The case of an item is changed by calling `char-downcase'
+if CASE is `:down', `char-upcase' if CASE is `:up' and in a fashion
+analogous to `string-capitalize' if CASE is `:capital'."))

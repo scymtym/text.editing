@@ -37,7 +37,9 @@
                               (:file "deletion")
                               (:file "items")
                               (:file "marking")
-                              (:file "copying"))))
+                              (:file "copying")
+                              ;; Additional operations
+                              (:file "changing-case"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
@@ -60,7 +62,9 @@
                               (:file "insertion")
                               (:file "deletion")
                               (:file "marking")
-                              (:file "copying"))))
+                              (:file "copying")
+                              ;; Additional operations
+                              (:file "changing-case"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))

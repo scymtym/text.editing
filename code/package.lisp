@@ -212,4 +212,8 @@
   ;; Copying
   (:export
    #:yank
-   #:copy))
+   #:copy)
+
+  ;; Modification
+  (:export
+   #:change-case))

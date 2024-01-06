@@ -360,6 +360,7 @@ bundle conditions for multiple sites in a single condition.
 * Items Functions::
 * Marking Operations::
 * Copy and Yank Operations::
+* Case Changing Operations::
 @end menu
 
 @quotation note
@@ -598,4 +599,26 @@ the insertion stack.
 
 Whether a new entry should be created is decided according to an
 internal protocol that may be exported at some later time.
+@end deffn
+
+@node Case Changing Operations
+@subsection Case Changing Operations
+
+@defgena{change-case,text.editing} cursor unit direction case
+Change the case of the sub-sequence of buffer items indicated by
+@var{cursor}, @var{unit} and @var{direction} according to @var{case}.
+
+@var{cursor} is an attached Cluffer cursor.
+
+@var{unit} is a unit of movement such as @ref{unit-item,item},
+@ref{unit-word,word}, or @t{expression}.
+
+@var{direction} is either @t{:forward} or @t{:backward}.
+
+@var{case} has to be one of @t{:down}, @t{:up} or @t{:capital}.
+
+The case of an item is changed by calling @t{cl:char-downcase} if
+@var{case} is @t{:down}, @t{cl:char-upcase} if @var{case} is @t{:up} and
+in a fashion analogous to @t{cl:string-capitalize} if @var{case} is
+@t{capital}.
 @end deffn
