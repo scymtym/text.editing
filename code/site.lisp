@@ -32,11 +32,28 @@
 (defmethod push-operation ((operation t) (site operation-history-mixin))
   (vector-push-extend operation (operation-history site)))
 
+;;; Mixin class `site-data-mixin'
+
+(defclass site-data-mixin ()
+  ((%data :reader   %data
+          :initform (make-hash-table))))
+
+(defmethod data ((key t) (site site-data-mixin))
+  (gethash key (%data site)))
+
+(defmethod (setf data) ((new-value null) (key t) (site site-data-mixin))
+  (remhash key (%data site))
+  new-value)
+
+(defmethod (setf data) ((new-value t) (key t) (site site-data-mixin))
+  (setf (gethash key (%data site)) new-value))
+
 ;;; Class `site'
 
 (defclass site (pi:print-items-mixin
                 operation-history-mixin
-                preferred-column-tracking-mixin)
+                preferred-column-tracking-mixin
+                site-data-mixin)
   ((%point           :initarg  :point
                      :accessor point)
    (%mark            :initarg  :mark

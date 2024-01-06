@@ -133,6 +133,18 @@ between lines without moving within any line."))
   (:documentation
    "Push OPERATION into the operation history of SITE."))
 
+;;; Site data protocol
+
+(defgeneric data (key site)
+  (:documentation
+   "Return data associated with SITE for KEY or `nil'."))
+
+(defgeneric (setf data) (new-value key site)
+  (:documentation
+   "Set data associated with SITE for KEY to NEW-VALUE.
+
+If NEW-VALUE is `nil' remove the data for KEY from SITE."))
+
 ;;; Site protocol
 ;;;
 ;;; Includes the detach protocol

@@ -117,6 +117,12 @@
 
    #:operation-history-mixin)
 
+  ;; Site data protocol and mixin
+  (:export
+   #:data ; also `setf'
+
+   #:site-data-mixin)
+
   ;; Site protocol and class
   (:export
    #:point ; also `setf'
