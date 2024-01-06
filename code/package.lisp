@@ -9,9 +9,10 @@
    #:cl)
 
   (:local-nicknames
-   (#:a #:alexandria)
+   (#:a  #:alexandria)
+   (#:pi #:utilities.print-items)
 
-   (#:c #:cluffer))
+   (#:c  #:cluffer))
 
   ;; Types
   (:export
@@ -20,7 +21,11 @@
 
   ;; Conditions
   (:export
-   #:editing-condition)
+   #:editing-condition
+
+   #:site-condition
+
+   #:insertion-stack-empty-error)
 
   ;; Line utilities
   (:export
@@ -77,4 +82,16 @@
 
    #:word
    #:sentence
-   #:paragraph))
+   #:paragraph)
+
+  ;; Insertion stack protocol
+  (:export
+   #:forward
+   #:backward
+   #:insertion
+
+   #:entry-count
+   #:top-entry
+   #:find-entry
+   #:push-entry
+   #:pop-entry))

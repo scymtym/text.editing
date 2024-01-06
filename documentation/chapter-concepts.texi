@@ -19,6 +19,32 @@ to the point cursor.  For example, the @t{word} unit refers to a
 sequence of non-whitespace, non-punctuation characters that follow (or
 precede depending on the specified direction) the point cursor.
 
+@item Insertion Stack
+
+@cindex insertion stack
+The @anchor{term-insertion-stack} @dfn{insertion stack} is a stack the
+elements of which are recently copied or killed sequences of buffer
+items which can be inserted into a buffer.  ``Kill'' and ``yank''
+operations push to and pop from this stack.
+
+This concept is similar to the ``Kill Ring'' in Emacs with the following
+differences:
+
+@itemize
+
+@item As the name suggests, the Emacs kill ring can grow to a maximum
+number of items after which it will start discarding the least recent
+elements.  In practice however, Emacs is often configured to keep a
+practically unlimited number of kill ring elements.  The insertion stack
+is unlimited by default.
+
+@item The Emacs kill ring is global by default and has to be restricted
+to a local context for extended functionality like editing with multiple
+cursors.  In contrast, each insertion stack is local to a specific site
+by default.
+
+@end itemize
+
 @end table
 
 @node Units

@@ -11,6 +11,7 @@
 
   :version     (:read-file-form "version-string.sexp")
   :depends-on  ("alexandria"
+                "utilities.print-items"
 
                 "cluffer")
 
@@ -25,7 +26,9 @@
                               (:file "cursor-utilities")
 
                               (:file "predicates")
-                              (:file "unit"))))
+                              (:file "unit")
+
+                              (:file "insertion-stack"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 

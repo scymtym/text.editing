@@ -3,6 +3,7 @@
 
 @menu
 * Unit Protocol::
+* Insertion Stack Protocol::
 @end menu
 
 This chapter describes the external protocols provided by the @sysname{} library.
@@ -45,4 +46,79 @@ will be valid.  In other words, when the returned function is passed to
 @ref{Generic-Function text.editing|apply-from-cursor, apply-from-cursor},
 that call has to use the same value for the @var{direction} argument as
 the call to this function.
+@end deffn
+
+@node Insertion Stack Protocol
+@section Insertion Stack Protocol
+
+@cindex insertion stack
+
+This protocol allows querying and manipulating the entries of an
+insertion stack.  This protocol is not concerned with buffers, sites or
+cursors.
+
+@defclassa{insertion-stack-empty,text.editing}
+This error is signaled when an attempt is made to retrieve an entry from
+an empty insertion stack.
+@end deftp
+
+@defgena{forward,text.editing} insertion-entry
+Return the sequence of items that have been added to
+@var{insertion-entry} by forward deletion operations such as
+@t{cluffer:delete-item} and @t{cluffer:join-line}.
+@end deffn
+
+@defgena{(setf forward),text.editing} new-value insertion-entry
+Set the sequence of items for forward deletion operations of
+@var{insertion-entry} to @var{new-value}.
+@end deffn
+
+@defgena{backward,text.editing} insertion-entry
+Return the sequence of items that have been added to
+@var{insertion-entry} by backward deletion operations such as
+@t{cluffer:erase-item}.
+@end deffn
+
+@defgena{(setf backward),text.editing} new-value insertion-entry
+Set the sequence of items for backward deletion operations of
+@var{insertion-entry} to @var{new-value}.
+@end deffn
+
+@defgena{insertion,text.editing} insertion-entry
+Return a sequence of items that should be inserted into a buffer to
+conceptually insert @var{insertion-entry} into that buffer.
+
+The returned sequence is the concatenation of the items of the
+``forward'' and ``backward'' sequences of @var{insertion-entry} in the
+appropriate order.
+@end deffn
+
+@defgena{entry-count,text.editing} insertion-stack
+Return number of insertion entries in @var{insertion-stack}.
+@end deffn
+
+@defgena{top-entry,text.editing} insertion-stack
+Return the top entry in @var{insertion-stack} or @t{nil}.
+
+The @t{forward}, @t{backward} and @t{insertion} functions can be applied
+to the returned object.
+@end deffn
+
+@defgena{find-entry,text.editing} index insertion-stack
+Return the entry at @var{index} in @var{insertion-stack}.
+
+The @t{forward}, @t{backward} and @t{insertion} functions can be applied
+to the returned object.
+@end deffn
+
+@defgena{push-entry,text.editing} insertion-stack
+Add a new entry to @var{insertion-stack} and return the new entry.
+@end deffn
+
+@defgena{pop-entry,text.editing} insertion-stack
+Remove the top entry from @var{insertion-stack} and return the removed
+entry.
+
+If @var{insertion-stack} is empty, signal an error of type
+@t{insertion-stack-empty-error}.
 @end deffn
