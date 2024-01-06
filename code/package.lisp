@@ -223,4 +223,9 @@
   (:export
    #:*fill-column*
    #:insert-words-fill
-   #:fill-words))
+   #:fill-words)
+
+  ;; Commenting
+  (:export
+   #:comment
+   #:uncomment))

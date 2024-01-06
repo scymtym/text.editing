@@ -363,6 +363,7 @@ bundle conditions for multiple sites in a single condition.
 * Case Changing Operations::
 * Transposing Operations::
 * Filling Operations::
+* Commenting Operations::
 @end menu
 
 @quotation note
@@ -697,5 +698,21 @@ filling with @var{words}.
 @var{prefix}, @var{suffix}, @var{per-line-prefix} and @var{fill-column}
 behave as described for
 @ref{Generic-Function text.editing|insert-words-fill,insert-words-fill}.
+@end deffn
 
+@node Commenting Operations
+@subsection Commenting Operations
+
+@defgena{comment,text.editing} cursor unit direction @key{} comment-syntax
+Comment buffer items at or around @var{cursor} according to @var{unit}
+and @var{direction}.
+
+@var{comment-syntax}, if supplied, has to be a string which specifies
+the comment syntax to use.  The default is @t{;;} if @var{unit} is
+@ref{unit-line,line} and @t{#|} otherwise.
+@end deffn
+
+@defgena{uncomment,text.editing} cursor unit direction
+Uncomment buffer items at or around @var{cursor} according to @var{unit}
+and @var{direction}.
 @end deffn

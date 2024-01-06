@@ -502,3 +502,7 @@ is positioned after the operation."))
 (defgeneric fill-words (start-cursor end-cursor words
                         &rest args
                         &key prefix suffix per-line-prefix fill-column))
+
+(defgeneric comment (cursor unit direction &key comment-syntax))
+
+(defgeneric uncomment (cursor unit direction))

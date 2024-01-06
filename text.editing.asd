@@ -41,7 +41,8 @@
                               ;; Additional operations
                               (:file "changing-case")
                               (:file "transposing")
-                              (:file "filling"))))
+                              (:file "filling")
+                              (:file "commenting"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
