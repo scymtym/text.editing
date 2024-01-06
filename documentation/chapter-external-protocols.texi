@@ -11,6 +11,7 @@
 * Buffer Protocol::
 * Multiple Sites Protocol::
 * Operation Protocol::
+* Movement and Editing Protocol::
 @end menu
 
 This chapter describes the external protocols provided by the @sysname{} library.
@@ -346,4 +347,39 @@ condition that may be signaled by the @var{operation} call.  However, if
 @var{target} is a buffer and multiple sites exist, a different
 convention may be used in order to return one result for each site or
 bundle conditions for multiple sites in a single condition.
+@end deffn
+
+@node Movement and Editing Protocol
+@section Movement and Editing Protocol
+
+@menu
+* Motion Operations::
+@end menu
+
+@quotation note
+The operations described in this section can be invoked by calling the
+respective generic function.  However, a more flexible way which, for
+example, handles multiple sites correctly is the @ref{Operation
+Protocol}.  The following code invokes an operation @var{operation} via
+that protocol
+@lisp
+(text.editing:perform @var{buffer} '@var{operation} @var{unit} @var{direction} @var{other-arguments})
+@end lisp
+@end quotation
+
+@node Motion Operations
+@subsection Motion Operations
+
+@defgena{move,text.editing} cursor unit direction
+Move @var{cursor} to the beginning or end of the sub-sequence of buffer
+items indicated by @var{unit}.
+
+If @var{direction} is @t{:forward}, @var{cursor} moves to the end of the
+sub-sequence. If @var{direction} is @t{:backward}, @var{cursor} moves to
+the beginning of the sub-sequence.
+@end deffn
+
+@defgena{back-to-indentation,text.editing} cursor
+Move @var{cursor} to the first column of the current line that contains
+a non-whitespace item.
 @end deffn

@@ -273,3 +273,17 @@ sites in a single condition."))
      ;; Call the operation with the site instead of the point cursor of
      ;; the site.
      (apply (function ,operation) target operation-arguments)))
+
+;;; Operations
+
+;;; Motion Operations
+
+(defgeneric move (cursor unit direction)
+  (:documentation
+   "Move CURSOR in DIRECTION by one UNIT, return CURSOR.
+
+CURSOR is an attached Cluffer cursor that should be moved.
+
+UNIT is a unit of movement such as `:item', `:word', `:expression'.
+
+DIRECTION is either `:forward' or `:backward'."))

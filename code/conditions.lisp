@@ -38,3 +38,18 @@
      (declare (ignore condition))
      (format stream "~@<There are no additional sites.~@:>"))))
 
+(define-condition operation-would-collapse-sites-error
+    (multiple-sites-condition error)
+  ((%operation :initarg :operation
+               :reader  operation)
+   (%arguments :initarg :arguments
+               :reader  arguments))
+  (:default-initargs
+   :operation (a:required-argument :operation)
+   :arguments (a:required-argument :arguments))
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<Performing the operation ~A~@[ ~{~A~^ ~}~] with ~
+                     multiple sites would collapse the points of all sites ~
+                     to the same location.~@:>"
+             (operation condition) (arguments condition)))))

@@ -29,7 +29,11 @@
 
    #:multiple-sites-condition
 
-   #:singular-site-error)
+   #:singular-site-error
+
+   #:operation-would-collapse-sites-error
+   #:operation
+   #:arguments)
 
   ;; Line utilities
   (:export
@@ -156,4 +160,10 @@
 
   ;; Operation protocol
   (:export
-   #:perform))
+   #:perform)
+
+  ;; Motion
+  (:export
+   #:move
+
+   #:back-to-indentation))
