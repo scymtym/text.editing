@@ -28,7 +28,9 @@
                               (:file "predicates")
                               (:file "unit")
 
-                              (:file "insertion-stack"))))
+                              (:file "insertion-stack")
+                              (:file "site")
+                              (:file "buffer-mixins"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 

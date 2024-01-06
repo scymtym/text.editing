@@ -24,3 +24,17 @@
    (lambda (condition stream)
      (format stream "~@<The insertion stack is empty in ~A.~@:>"
              (site condition)))))
+
+;;; Multiple sites
+
+(define-condition multiple-sites-condition (editing-condition)
+  ())
+
+(define-condition singular-site-error (multiple-sites-condition
+                                       error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (declare (ignore condition))
+     (format stream "~@<There are no additional sites.~@:>"))))
+

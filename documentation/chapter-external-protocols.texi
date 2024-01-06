@@ -2,11 +2,23 @@
 @chapter External Protocols
 
 @menu
+* Detach Protocol::
 * Unit Protocol::
 * Insertion Stack Protocol::
+* Preferred Column Protocol::
+* Site Protocol::
+* Buffer Protocol::
+* Multiple Sites Protocol::
 @end menu
 
 This chapter describes the external protocols provided by the @sysname{} library.
+
+@node Detach Protocol
+@section Detach Protocol
+
+@defgena{detach,text.editing} (object)
+Detach @var{object} from any buffer or line it is currently attached to.
+@end deffn
 
 @node Unit Protocol
 @section Unit Protocol
@@ -121,4 +133,174 @@ entry.
 
 If @var{insertion-stack} is empty, signal an error of type
 @t{insertion-stack-empty-error}.
+@end deffn
+
+@node Preferred Column Protocol
+@section Preferred Column Protocol
+
+The purpose of this protocol is tracking in which column the point
+cursor of a site should be placed when the cursor repeatedly moves
+vertically (between lines) without other movement or operations.
+
+@defgena{preferred-column,text.editing} site
+Return the column number in which the point of @var{site} should reside
+by default.
+
+The point cursor should be placed in that column or the closest
+existing column of the current line when the point cursor moves
+between lines without moving within any line.
+@end deffn
+
+@defgena{(setf preferred-column,text.editing)} new-value site
+Set the column number in which the point of @var{site} should reside by
+default to @var{new-value}.
+@end deffn
+
+@node Site Protocol
+@section Site Protocol
+
+@cindex site
+
+The site protocol extends the @ref{Detach Protocol}, that is, sites can
+be detached.
+
+@defgena{point,text.editing} site
+Return the point cursor of @var{site}.
+
+The returned object is a Cluffer cursor
+@end deffn
+
+@defgena{mark,text.editing} site
+Return the mark cursor of @var{site}.
+
+The returned object is a Cluffer cursor.
+@end deffn
+
+@defgena{mark-active-p,text.editing} site
+Indicate whether the mark cursor of @var{site} is active.
+@end deffn
+
+@defgena{(setf mark-active-p),text.editing} new-value site
+Change whether the mark cursor of @var{site} is active.
+
+@var{new-value} is a generalized Boolean.
+@end deffn
+
+@defgena{mark-stack,text.editing} site
+Return the mark stack of @var{site}.
+@end deffn
+
+@defgena{insertion-stack,text.editing} site
+Return the insertion stack of @var{site}.
+
+The returned object implements the @ref{Insertion Stack Protocol}.
+@end deffn
+
+@node Buffer Protocol
+@section Buffer Protocol
+
+@defgena{site,text.editing} buffer
+Return the primary site of @var{buffer}.
+@end deffn
+
+The generic functions @ref{Generic-Function text.editing|point,point}
+and @ref{Generic-Function text.editing|mark,mark} defined in the
+@ref{Site Protocol} work on buffers as well.  The return value is the
+primary point cursor and the primary mark cursor respectively.
+
+@node Multiple Sites Protocol
+@section Multiple Sites Protocol
+
+@defgena{site-count,text.editing} buffer
+Return the total number of sites that are attached to @var{buffer}.
+
+The returned count includes the primary site.
+@end deffn
+
+@defgena{map-sites,text.editing} function buffer
+Call @var{function} with each site that is attached to @var{buffer}.
+@end deffn
+
+@defgena{sites,text.editing} buffer
+Return the sequence of all sites which are attached to @var{buffer}.
+@end deffn
+
+@defgena{add-site,text.editing} site buffer
+Add @var{site} to the sites of @var{buffer}.
+
+Return @var{site}.
+
+If the point cursor or the mark cursor of @var{site} is associated with
+a buffer other than @var{bar}, an error is signaled.
+
+If @var{site} is already one of the sites that are attached to
+@var{buffer}, signal an error.
+@end deffn
+
+@defgena{remove-site,text.editing} site buffer
+Remove @var{site} fro the sites of @var{buffer}.
+
+Return @var{site}.
+
+If @var{site} is not one of the sites that are attached to @var{buffer},
+signal an error.
+
+If @var{site} is the primary site of @var{buffer}, signal an error.
+@end deffn
+
+@defgena{push-site-at,text.editing} buffer line position
+Create a new site at @var{line} and @var{position} and attached it to
+@var{buffer}.
+
+@var{line} and @var{position} control the location of the point cursor
+of the new site.
+
+Return the new site.
+@end deffn
+
+@defgena{push-site-relative,text.editing} buffer unit direction
+Create a new site relative to the primary site and attached it to
+@var{buffer}.
+
+@var{unit} and @var{direction} control the location of the point cursor
+of the new site.  The new point cursor starts at the location of the
+primary point cursor, then moves according to @var{unit} and
+@var{direction}.
+
+Return the new site.
+
+The attempt to move the new point cursor the specified location may
+result in an error.  In that case, the new site is not attached and the
+error is signaled.
+@end deffn
+
+@defgena{pop-site,text.editing} buffer
+Remove the most recently added site from @var{buffer}.
+
+Return the removed site.
+
+If no sites beside the primary site are attached to @var{buffer},
+signal an error of type @t{singular-site-error}.
+@end deffn
+
+@defgena{rotate-sites,text.editing} buffer direction
+Swap roles between the primary site and secondary sites.
+
+@var{direction} controls the direction of the rotation.
+
+TODO explain this properly
+
+TODO @var{direction} is ignored at the moment
+
+If no sites beside the primary site are attached to @var{buffer},
+signal an error of type @t{singular-site-error}.
+@end deffn
+
+@defgena{other-sites,text.editing} buffer
+Return the sequence of all sites which are attached to @var{buffer}
+except the primary site.
+@end deffn
+
+@defgena{remote-other-sites,text.editing} buffer
+Remove all sites from @var{buffer} except the primary site.
 @end deffn

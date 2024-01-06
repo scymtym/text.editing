@@ -25,7 +25,11 @@
 
    #:site-condition
 
-   #:insertion-stack-empty-error)
+   #:insertion-stack-empty-error
+
+   #:multiple-sites-condition
+
+   #:singular-site-error)
 
   ;; Line utilities
   (:export
@@ -45,6 +49,10 @@
    #:with-temporary-cursor
    #:call-with-cloned-cursor
    #:with-cloned-cursor)
+
+  ;; Detach protocol
+  (:export
+   #:detach)
 
   ;; Extended cursor protocol
   (:export
@@ -94,4 +102,41 @@
    #:top-entry
    #:find-entry
    #:push-entry
-   #:pop-entry))
+   #:pop-entry)
+
+  ;; Preferred column tracking protocol and mixin
+  (:export
+   #:preferred-column ; also `setf'
+
+   #:preferred-column-tracking-mixin)
+
+  ;; Site protocol and class
+  (:export
+   #:point ; also `setf'
+   #:mark ; also `setf'
+   #:mark-active-p ; also `setf'
+   #:mark-stack
+   #:insertion-stack
+
+   #:site)
+
+  ;; Buffer protocol and mixins
+  (:export
+   #:site
+
+   #:site-mixin
+
+   #:other-sites
+   #:site-count
+   #:map-sites
+   #:sites
+   #:add-site
+   #:remove-site
+
+   #:push-site-at
+   #:push-site-relative
+   #:pop-site
+   #:rotate-sites
+   #:remove-other-sites
+
+   #:multiple-site-mixin))

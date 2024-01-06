@@ -6,18 +6,105 @@
 @end menu
 
 This section defines a few concepts that are important for the
-@sysname{} library and describes how they related to each other.
+@sysname{} library and describes how they related to each other.  The
+following figure illustrates some of the concepts and their relations:
+
+@float Figure,fig:architecture
+@center @image{architecture,15cm}
+@caption{Examples of important concepts and their relations for a single
+buffer.}
+@end float
 
 @table @dfn
+
+@item Buffer
+
+@cindex buffer
+A buffer is conceptually a sequence of lines, each of which contains a
+sequence of items and zero or more attached cursors.
+
+@sysname{} does not provide an implementation of the buffer concept or
+associated protocols.  Instead, it uses the protocols and classes
+provided by the cluffer library.
+
+@item Cursor
+
+@cindex cursor
+A cursor is an object that is attached to a buffer line before this
+first item, after the last item or between to adjacent items.
+
+@sysname{} does not provide an implementation of the cursor concept or
+associated protocols.  Instead, it uses the protocols and classes
+provided by the cluffer library.
+
+@item Point
+
+@cindex point
+The @anchor{term-point} @dfn{point} is a distinguished cursor within
+each @ref{term-site, site} which specifies the buffer location at which
+the next editing operation issued by a user will be performed.
+
+@item Mark
+
+@cindex mark
+The @anchor{term-mark} @dfn{mark} is a distinguished cursor within each
+@ref{term-site,site} that has multiple purposes:
+@itemize
+@item
+Mark cursors can be used to save buffer locations and return to them
+later.
+
+@item
+Together with the @ref{term-point,point} cursor, the mark cursor can
+specify a region within the buffer on which operations can be performed.
+@end itemize
+
+The mark cursor of a site can either @dfn{active} or @dfn{inactive}.
 
 @item Unit
 
 @cindex unit
 @anchor{term-unit} @dfn{Units} are a way to designate particular
 sub-sequences of the sequence of all items in a buffer, often relative
-to the point cursor.  For example, the @t{word} unit refers to a
-sequence of non-whitespace, non-punctuation characters that follow (or
-precede depending on the specified direction) the point cursor.
+to the @ref{term-point,point} cursor.  For example, the @t{word} unit
+refers to a sequence of non-whitespace, non-punctuation characters that
+follow (or precede depending on the specified direction) the point
+cursor.
+
+@item Site
+
+@cindex site
+A @anchor{term-site} @dfn{site} ties together pieces of data that are
+required for performing consecutive editing operations around a specific
+``location'', or site, in a buffer.  The most important piece of data is
+the @ref{term-point,point} cursor which makes precise the notion of a
+buffer ``location''.  Other pieces of data include the ``preferred''
+column of the point cursor, an optional @ref{term-mark,mark} cursor, a
+mark stack and an insertion stack.
+
+The main reason for storing this data in a dedicated site object instead
+of directly in a buffer is the possibility of allowing simultaneous
+editing at multiple sites in a buffer.  From the perspective of an
+editor user, each site would typically appear as a cursor (with its own
+point, mark, insertion stack, etc.) which would generally act as if it
+were the only cursor in the buffer (disregarding effects that arise from
+sites being too close together or overlapping).
+
+Each buffer has exactly one @dfn{primary} site and zero or more
+@dfn{secondary} sites.  Secondary sites are added and removed by certain
+operation.  A secondary site and the primary site can switch roles since
+the invariant the associated buffer has to have exactly one primary site
+is preserved by that operation.
+
+@item Mark Stack
+
+@cindex mark stack
+A @anchor{term-mark-stack} @dfn{mark stack} is a stack which contains
+former mark cursors of a @ref{term-site,site}.  Typical operations on
+the mark stack include pushing a mark cursor that corresponds to the
+location of the point cursor onto the mark stack and later popping the
+entry ``into'' the point cursor.  This combination of operations allows
+remembering buffer locations and returning to them later.
 
 @item Insertion Stack
 

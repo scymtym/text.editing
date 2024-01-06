@@ -6,6 +6,12 @@
 
 (cl:in-package #:text.editing)
 
+;;; Detach protocol
+
+(defgeneric detach (object)
+  (:documentation
+   "Detach OBJECT from any buffer or line it is currently attached to."))
+
 ;;; Extended cursor protocol
 
 (defgeneric delete-item-forward (cursor))
@@ -102,3 +108,103 @@ the returned object."))
 
 If INSERTION-STACK is empty, signal an error of type
 INSERTION-STACK-EMPTY-ERROR."))
+
+;;; Preferred column protocol
+
+(defgeneric preferred-column (site)
+  (:documentation
+   "Return the column number in which the point of SITE should reside by default.
+
+The point cursor should be placed in that column or the closest
+existing column of the current line when the point cursor moves
+between lines without moving within any line."))
+
+(defgeneric (setf preferred-column) (new-value site)
+  (:documentation
+   "Set the column number in which the point of SITE should reside by default to NEW-VALUE."))
+
+;;; Site protocol
+;;;
+;;; Includes the detach protocol
+
+(defgeneric point (site)
+  (:documentation
+   "Return the point cursor of SITE.
+
+The returned object is a cluffer cursor."))
+
+(defgeneric (setf point) (new-value site)
+  (:documentation
+   "Set the point cursor of SITE to NEW-VALUE."))
+
+(defgeneric mark (site)
+  (:documentation
+   "Return the mark cursor of SITE or `nil'.
+
+The returned object is a cluffer cursor."))
+
+(defgeneric (setf mark) (new-value site)
+  (:documentation
+   "Set the mark cursor of SITE to NEW-VALUE."))
+
+(defgeneric mark-active-p (site)
+  (:documentation
+   "Indicate whether the mark cursor of SITE is active."))
+
+(defgeneric (setf mark-active-p) (new-value site)
+  (:documentation
+   "Change whether the mark cursor of SITE is active.
+
+NEW-VALUE is a generalized Boolean."))
+
+(defgeneric mark-stack (site)
+  (:documentation
+   "Return the mark stack of SITE."))
+
+(defgeneric insertion-stack (site)
+  (:documentation
+   "Return the insertion stack of SITE."))
+
+;;; Buffer protocol
+
+(defgeneric site (buffer)
+  (:documentation
+   "Return the primary site of BUFFER."))
+
+(defgeneric (setf site) (new-value buffer))
+
+;;; Multiple sites protocol
+
+(defgeneric site-count (buffer)
+  (:documentation
+   "Return the total number of sites that are attached to BUFFER.
+
+The returned count includes the primary site."))
+
+(defgeneric map-sites (function buffer)
+  (:documentation
+   "Call FUNCTION with each site that is attached to BUFFER."))
+
+(defgeneric sites (buffer)
+  (:documentation
+   "Return the sequence of all sites which are attached to BUFFER."))
+
+(defgeneric add-site (site buffer))
+
+(defgeneric remove-site (site buffer))
+
+(defgeneric push-site-at (buffer line position))
+
+(defgeneric push-site-relative (buffer unit direction))
+
+(defgeneric pop-site (buffer))
+
+(defgeneric rotate-sites (buffer direction))
+
+(defgeneric other-sites (buffer)
+  (:documentation
+   "Return a sequence of secondary sites for BUFFER."))
+
+(defgeneric remove-other-sites (buffer)
+  (:documentation
+   "Remove all secondary sites from BUFFER."))
