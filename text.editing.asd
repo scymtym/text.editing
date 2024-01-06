@@ -10,13 +10,19 @@
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
   :version     (:read-file-form "version-string.sexp")
-  :depends-on  ()
+  :depends-on  ("alexandria"
+
+                "cluffer")
 
   :components  ((:module     "code"
                  :serial     t
                  :components ((:file "package")
+                              (:file "types")
                               (:file "protocol")
-                              (:file "conditions"))))
+                              (:file "conditions")
+
+                              (:file "line-utilities")
+                              (:file "cursor-utilities"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
