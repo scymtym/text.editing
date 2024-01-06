@@ -51,7 +51,8 @@
 
   :components  ((:module     "test"
                  :serial     t
-                 :components ((:file "package"))))
+                 :components ((:file "package")
+                              (:file "utilities"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))

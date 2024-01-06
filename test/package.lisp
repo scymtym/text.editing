@@ -9,6 +9,8 @@
    #:cl)
 
   (:local-nicknames
+   (#:a #:alexandria)
+   (#:c #:cluffer)
    (#:e #:text.editing))
 
   (:import-from #:fiveam
