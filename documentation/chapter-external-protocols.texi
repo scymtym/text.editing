@@ -362,6 +362,7 @@ bundle conditions for multiple sites in a single condition.
 * Copy and Yank Operations::
 * Case Changing Operations::
 * Transposing Operations::
+* Filling Operations::
 @end menu
 
 @quotation note
@@ -636,4 +637,65 @@ boundary of that @var{unit} according to @var{direction}.
 
 @var{direction} is either @t{:forward} or @t{:backward} and controls
 where @var{cursor} is positioned after the operation.
+@end deffn
+
+@node Filling Operations
+@subsection Filling Operations
+
+@defgena{insert-words-fill,text.editing} cursor words @pkey{} @
+  prefix suffix per-line-prefix fill-column
+Insert @var{words} at @var{cursor} with added line breaks according to
+@var{fill-column}.
+
+@var{words} is a sequence of strings.
+
+Each of @var{prefix}, @var{suffix} and @var{per-line-prefix} is a string
+if supplied.
+
+@var{fill-column}, if supplied, is positive integer.  If not supplied,
+@var{fill-column} defaults to the value of
+@t{text.editing:*fill-column*} which in turn is bound to @t{80} by
+default.
+
+Roughly proceed as follows:
+@enumerate
+
+@item
+If it has been supplied, insert the @var{prefix} string.
+
+@item
+For each string in @var{words}
+
+@itemize
+
+@item
+If inserting the string at the current location would exceed
+@var{fill-column}, insert a line break and, if it has been supplied,
+insert the @var{per-line-prefix} string.
+
+@item
+Unless the string is just punctuation, insert a space.
+
+@item
+Insert the string.
+
+@end itemize
+
+@item
+If it has been supplied, insert the @var{suffix} string.
+
+@end enumerate
+@end deffn
+
+@defgena{fill-words,text.editing} start-cursor end-cursor words @
+  @pkey{} prefix suffix per-line-prefix fill-column
+Replace the region between @var{start-cursor} and @var{end-cursor} by
+filling with @var{words}.
+
+@var{words} is a sequence of strings.
+
+@var{prefix}, @var{suffix}, @var{per-line-prefix} and @var{fill-column}
+behave as described for
+@ref{Generic-Function text.editing|insert-words-fill,insert-words-fill}.
+
 @end deffn

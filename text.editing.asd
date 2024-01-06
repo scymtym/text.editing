@@ -40,7 +40,8 @@
                               (:file "copying")
                               ;; Additional operations
                               (:file "changing-case")
-                              (:file "transposing"))))
+                              (:file "transposing")
+                              (:file "filling"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
@@ -66,7 +67,8 @@
                               (:file "copying")
                               ;; Additional operations
                               (:file "changing-case")
-                              (:file "transposing"))))
+                              (:file "transposing")
+                              (:file "filling"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))

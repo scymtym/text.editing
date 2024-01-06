@@ -493,3 +493,12 @@ UNIT according to DIRECTION.
 
 DIRECTION is either `:forward' or `:backward' and controls where CURSOR
 is positioned after the operation."))
+
+;;; Filling operations
+
+(defgeneric insert-words-fill (cursor words
+                               &key prefix suffix per-line-prefix fill-column))
+
+(defgeneric fill-words (start-cursor end-cursor words
+                        &rest args
+                        &key prefix suffix per-line-prefix fill-column))

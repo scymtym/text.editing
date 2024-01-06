@@ -217,4 +217,10 @@
   ;; Modification
   (:export
    #:change-case
-   #:transpose))
+   #:transpose)
+
+  ;; Filling
+  (:export
+   #:*fill-column*
+   #:insert-words-fill
+   #:fill-words))
