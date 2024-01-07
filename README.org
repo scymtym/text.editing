@@ -11,7 +11,7 @@
   This library provides protocols and implementations of those
   protocols for text editing operations which are required by, for
   example, text editors or commandline processors (like REPLs). This
-  library relies on the [[https://github.com/RobertStrandh/cluffer][Cluffer]] library for the fundamental concepts
+  library relies on the [[https://github.com/Robert-Strandh/cluffer][Cluffer]] library for the fundamental concepts
   of buffers, lines and cursors. The functionality provided by this
   library includes:
 
