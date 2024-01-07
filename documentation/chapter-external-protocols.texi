@@ -316,7 +316,7 @@ Return the sequence of all sites which are attached to @var{buffer}
 except the primary site.
 @end deffn
 
-@defgena{remote-other-sites,text.editing} buffer
+@defgena{remove-other-sites,text.editing} buffer
 Remove all sites from @var{buffer} except the primary site.
 @end deffn
 
