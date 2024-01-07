@@ -72,13 +72,14 @@
           (error "~@<Missed unit~P ~{~A~^, ~}.~@:>"
                  (length remaining) remaining))
         (format stream "@verbatim~%")
-        (utilities.print-tree:print-tree
-         *standard-output* root
-         (utilities.print-tree:make-node-printer
-          (lambda (stream depth node)
-            (declare (ignore depth))
-            (princ (class-name (node-value node)) stream))
-          nil #'node-children))
+        (let ((utilities.print-tree:*use-unicode?* nil))
+          (utilities.print-tree:print-tree
+           *standard-output* root
+           (utilities.print-tree:make-node-printer
+            (lambda (stream depth node)
+              (declare (ignore depth))
+              (princ (class-name (node-value node)) stream))
+            nil #'node-children)))
         (format stream "~&@end verbatim~%")))))
 
 (emit-unit-descriptions)
