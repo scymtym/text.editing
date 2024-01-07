@@ -1,5 +1,5 @@
 SBCL ?= sbcl
-QUICKLISP_DIRECTORY ?= ~/quicklisp/
+QUICKLISP_DIRECTORY ?= $${HOME}/quicklisp/
 ASDF_SOURCE_REGISTRY ?= (quote (:source-registry (:directory "'$$(pwd)/..'") :ignore-inherited-configuration))
 
 NAME = text.editing
@@ -33,7 +33,7 @@ generated-builtin-units.texi generated-chapter-equivalent-emacs-commands.texi: \
 	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit     \
 	  --load "$(QUICKLISP_DIRECTORY)/setup.lisp"                         \
 	  --eval '(asdf:initialize-source-registry $(ASDF_SOURCE_REGISTRY))' \
-	  --eval '(asdf:load-system "text.editing")'                         \
+	  --eval '(ql:quickload "text.editing")'                             \
 	  --eval '(ql:quickload "utilities.print-tree")'                     \
 	  --load '../tools/generate-documentation.lisp'                      \
 	  --quit
@@ -51,6 +51,10 @@ $(NAME).html: $(INPUTS) $(FIGURES) $(wildcard *.css)
 	makeinfo --html --no-split --no-headers \
 	         --css-include=style-common.css --css-include=style-single.css \
 	         $(NAME).texi
+        # Texinfo produce text.html for some reason
+	@if [ -e text.html ] ; then \
+	    mv text.html $@ ;       \
+	fi
 
 clean:
 	rm -f *.cp *.cps *.fn *.fns \
