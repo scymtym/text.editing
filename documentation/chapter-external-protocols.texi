@@ -7,9 +7,8 @@
 * Insertion Stack Protocol::
 * Preferred Column Protocol::
 * Operation History Protocol::
-* Site Protocol::
-* Buffer Protocol::
-* Multiple Sites Protocol::
+* Site Protocols::
+* Buffer Protocols::
 * Operation Protocol::
 * Movement and Editing Protocol::
 @end menu
@@ -19,12 +18,20 @@ This chapter describes the external protocols provided by the @sysname{} library
 @node Detach Protocol
 @section Detach Protocol
 
+This protocol is used to sever connections between @ref{term-site,sites}
+(and associated objects) and buffers when those objects should no longer
+be associated with the respective buffer.
+
 @defgena{detach,text.editing} (object)
 Detach @var{object} from any buffer or line it is currently attached to.
 @end deffn
 
 @node Unit Protocol
 @section Unit Protocol
+
+@deffuna{all-units,text.editing}
+Return a sequence of all defined units.
+@end deffn
 
 @defgena{apply-from-cursor,text.editing} continuation cursor unit direction
 Repeatedly call @var{continuation} until the sub-sequence of buffer
@@ -63,8 +70,21 @@ that call has to use the same value for the @var{direction} argument as
 the call to this function.
 @end deffn
 
+@node Site Protocols
+@section Site Protocols
+
+This section describes protocols related to @ref{term-site,sites} and
+mixin classes that provide default implementations of those protocols.
+
+@menu
+* Insertion Stack Protocol::
+* Preferred Column Protocol::
+* Operation History Protocol::
+* Site Protocol::
+@end menu
+
 @node Insertion Stack Protocol
-@section Insertion Stack Protocol
+@subsection Insertion Stack Protocol
 
 @cindex insertion stack
 
@@ -73,7 +93,7 @@ insertion stack.  This protocol is not concerned with buffers, sites or
 cursors.  See @ref{Copy and Yank Operations} for a higher-level protocol
 on top of this one.
 
-@defclassa{insertion-stack-empty,text.editing}
+@defclassa{insertion-stack-empty-error,text.editing}
 This error is signaled when an attempt is made to retrieve an entry from
 an empty insertion stack.
 @end deftp
@@ -136,23 +156,24 @@ Remove the top entry from @var{insertion-stack} and return the removed
 entry.
 
 If @var{insertion-stack} is empty, signal an error of type
-@t{insertion-stack-empty-error}.
+@ref{Class text.editing|insertion-stack-empty-error,insertion-stack-empty-error}.
 @end deffn
 
 @node Preferred Column Protocol
-@section Preferred Column Protocol
+@subsection Preferred Column Protocol
 
-The purpose of this protocol is tracking in which column the point
-cursor of a site should be placed when the cursor repeatedly moves
-vertically (between lines) without other movement or operations.
+The purpose of this protocol is tracking in which column the
+@ref{term-point,point} cursor of a site should be placed when the cursor
+repeatedly moves vertically (between lines) without other movement or
+operations.
 
 @defgena{preferred-column,text.editing} site
 Return the column number in which the point of @var{site} should reside
-by default.
+by default or @t{nil}.
 
-The point cursor should be placed in that column or the closest
-existing column of the current line when the point cursor moves
-between lines without moving within any line.
+The point cursor should be placed in that column or the rightmost
+existing column of the current line when the point cursor moves between
+lines without moving within any line.
 @end deffn
 
 @defgena{(setf preferred-column,text.editing)} new-value site
@@ -160,8 +181,39 @@ Set the column number in which the point of @var{site} should reside by
 default to @var{new-value}.
 @end deffn
 
+A default implementation of this protocol is provided by the following
+mixin class:
+
+@defclassa{preferred-column-tracking-mixin,text.editing}
+This class is intended to be mixed into site classes that track
+preferred column of the point cursor.
+@end deftp
+
 @node Operation History Protocol
-@section Operation History Protocol
+@subsection Operation History Protocol
+
+The purpose of this protocol is recording the sequence of operations
+that have been applied to a given @ref{term-site,site}.  This allows the
+command processor or certain operations, for example, to take into
+account the previous operation. Examples:
+
+@itemize
+
+@item
+Some operations behave differently when repeated such as setting the
+@ref{term-mark,mark} twice to first set the mark then deactivate it.
+
+@item
+The command processor may track runs of deletion operations to collect
+the deleted items into a single
+@ref{term-insertion-stack,insertion stack} entry.
+
+@item
+The command processor may track runs of insertion, deletion or
+modification operations to create undo groups from multiple primitive
+operations.
+
+@end itemize
 
 @defgena{most-recent-operation,text.editing} site
 Return the most recent operation of @var{site} or @t{nil}.
@@ -169,10 +221,22 @@ Return the most recent operation of @var{site} or @t{nil}.
 
 @defgena{push-operation,text.editing} operation site
 Push @var{operation} into the operation history of @var{site}.
+
+@var{operation} should be a list of the form
+@code{(@var{operation-name} . @var{arguments})}
+where @var{operation-name} is a symbol that names an operation function.
 @end deffn
 
+A default implementation of this protocol is provided by the following
+mixin class:
+
+@defclassa{operation-history-mixin,text.editing}
+This class is intended to be mixed into site classes that track the
+history of performed operations.
+@end deftp
+
 @node Site Protocol
-@section Site Protocol
+@subsection Site Protocol
 
 @cindex site
 
@@ -211,8 +275,19 @@ Return the insertion stack of @var{site}.
 The returned object implements the @ref{Insertion Stack Protocol}.
 @end deffn
 
-@node Buffer Protocol
-@section Buffer Protocol
+@node Buffer Protocols
+@section Buffer Protocols
+
+This section describes protocols for buffers and mixin classes which
+provide default implementations of the protocols.
+
+@menu
+* Primary Site Protocol::
+* Multiple Sites Protocol::
+@end menu
+
+@node Primary Site Protocol
+@subsection Primary Site Protocol
 
 @defgena{site,text.editing} buffer
 Return the primary site of @var{buffer}.
@@ -224,7 +299,17 @@ and @ref{Generic-Function text.editing|mark,mark} defined in the
 primary point cursor and the primary mark cursor respectively.
 
 @node Multiple Sites Protocol
-@section Multiple Sites Protocol
+@subsection Multiple Sites Protocol
+
+An implementation of this protocol is provided by the class
+
+@defclassa{multiple-site-mixin,text.editing}
+This class is intended to be mixed into buffer classes that can contain
+zero or more secondary @ref{term-site,sites} in addition to the primary
+site.
+@end deftp
+
+The protocol consists of the following generic functions:
 
 @defgena{site-count,text.editing} buffer
 Return the total number of sites that are attached to @var{buffer}.

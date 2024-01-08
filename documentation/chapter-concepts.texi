@@ -20,29 +20,40 @@ buffer.}
 @item Buffer
 
 @cindex buffer
-A buffer is conceptually a sequence of lines, each of which contains a
-sequence of items and zero or more attached cursors.
+A @dfn{buffer} is conceptually a sequence of lines, each of which
+contains a sequence of items and zero or more attached cursors.
 
-@sysname{} does not provide an implementation of the buffer concept or
-associated protocols.  Instead, it uses the protocols and classes
-provided by the cluffer library.
+The @sysname{} library does not provide an implementation of the buffer
+concept or associated protocols.  Instead, it uses the protocols and
+classes provided by the Cluffer library.  It does, however, provide
+mixin classes like
+@ref{Class text.editing|multiple-site-mixin,multiple-site-mixin} that
+are intended to be used in user-defined buffer classes.
 
 @item Cursor
 
 @cindex cursor
-A cursor is an object that is attached to a buffer line before this
-first item, after the last item or between to adjacent items.
+A @dfn{cursor} is an object that is attached to a buffer line before
+the first item, after the last item or between two adjacent items.
 
-@sysname{} does not provide an implementation of the cursor concept or
-associated protocols.  Instead, it uses the protocols and classes
-provided by the cluffer library.
+Some cursors like the distinguished @ref{term-point,point} and
+@ref{term-mark,mark} cursors are visible to and controlled by the user
+while others are used programmatically.  Editing
+@ref{term-operation,operations} generally accept one or more cursor
+arguments to indicate to which location or region of the buffer the
+operation should be applied.
+
+The @sysname{} library does not provide an implementation of the cursor
+concept or associated protocols.  Instead, it uses the protocols and
+classes provided by the Cluffer library.
 
 @item Point
 
 @cindex point
 The @anchor{term-point} @dfn{point} is a distinguished cursor within
 each @ref{term-site, site} which specifies the buffer location at which
-the next editing operation issued by a user will be performed.
+the next editing @ref{term-operation,operation} issued by a user will be
+performed.
 
 @item Mark
 
@@ -56,51 +67,57 @@ later.
 
 @item
 Together with the @ref{term-point,point} cursor, the mark cursor can
-specify a region within the buffer on which operations can be performed.
+specify a region within the buffer on which
+@ref{term-operation,operations} can be performed.
 @end itemize
 
-The mark cursor of a site can either @dfn{active} or @dfn{inactive}.
+The mark cursor of a site can be either @dfn{active} or @dfn{inactive}.
 
 @item Operation
 
 @cindex operation
-An @dfn{operation} changes the buffer content and/or state of sites in a
-particular way, usually depending on the values of one or more parameters.
+An @anchor{term-operation} @dfn{operation} changes the buffer content
+and/or state of @ref{term-site,sites} in a particular way, usually
+depending on the values of one or more parameters.
 
-For example, the @t{move} operation changes the buffer positions of the
-point cursors of all sites according to the specified @var{unit} and
-@var{direction} arguments.
+For example, the @ref{Generic-Function text.editing|move, move}
+operation changes the buffer positions of the point cursors of all sites
+according to the specified @var{unit} and @var{direction} arguments.
 
 @item Region
 
 @cindex region
 If a @ref{term-site,site} has an active @ref{term-mark,mark} cursor, the
 sequence of items between the @ref{term-point,point} cursor and the mark
-cursor forms the @anchor{term-region} @dfn{region}.  Operations can be
-performed on the region.  The specified sequence of items is the same
-regardless of which of the two cursors is closer to the beginning of the
-buffer.
+cursor forms the @anchor{term-region} @dfn{region}.
+@ref{term-operation,Operations} can be performed on the region using the
+@ref{unit-region,region} @ref{term-unit,unit}.  The specified sequence
+of items is the same regardless of which of the two cursors is closer to
+the beginning of the buffer.
 
 @item Unit
 
 @cindex unit
 @anchor{term-unit} @dfn{Units} are a way to designate particular
 sub-sequences of the sequence of all items in a buffer, often relative
-to the @ref{term-point,point} cursor.  For example, the @t{word} unit
-refers to a sequence of non-whitespace, non-punctuation characters that
-follow (or precede depending on the specified direction) the point
-cursor.
+to the @ref{term-point,point} cursor.  For example, the
+@ref{unit-word,word} unit refers to a sequence of non-whitespace,
+non-punctuation characters that follow (or precede depending on the
+specified direction) the point cursor.
 
 @item Site
 
 @cindex site
 A @anchor{term-site} @dfn{site} ties together pieces of data that are
-required for performing consecutive editing operations around a specific
-``location'', or site, in a buffer.  The most important piece of data is
-the @ref{term-point,point} cursor which makes precise the notion of a
-buffer ``location''.  Other pieces of data include the ``preferred''
-column of the point cursor, an optional @ref{term-mark,mark} cursor, a
-mark stack and an insertion stack.
+required for performing consecutive editing
+@ref{term-operation,operations} around a specific ``location'', or site,
+in a buffer.  The most important piece of data is the
+@ref{term-point,point} cursor which makes precise the notion of a buffer
+``location''.  Other pieces of data include the
+@ref{Preferred Column Protocol,``preferred'' column} of the point
+cursor, an optional @ref{term-mark,mark} cursor, a
+@ref{term-mark-stack,mark stack} and an
+@ref{term-insertion-stack,insertion stack}.
 
 The main reason for storing this data in a dedicated site object instead
 of directly in a buffer is the possibility of allowing simultaneous
@@ -111,10 +128,12 @@ were the only cursor in the buffer (disregarding effects that arise from
 sites being too close together or overlapping).
 
 Each buffer has exactly one @dfn{primary} site and zero or more
-@dfn{secondary} sites.  Secondary sites are added and removed by certain
-operation.  A secondary site and the primary site can switch roles since
-the invariant the associated buffer has to have exactly one primary site
-is preserved by that operation.
+@dfn{secondary} sites.  Secondary sites are added and removed by
+@ref{Generic-Function text.editing|add-site,certain operations}.  A
+secondary site and the primary site can
+@ref{Generic-Function text.editing|rotate-sites,switch roles} since the
+invariant that the associated buffer has to have exactly one primary
+site is preserved by that operation.
 
 @item Mark Stack
 
@@ -131,8 +150,8 @@ remembering buffer locations and returning to them later.
 @cindex insertion stack
 The @anchor{term-insertion-stack} @dfn{insertion stack} is a stack the
 elements of which are recently copied or killed sequences of buffer
-items which can be inserted into a buffer.  ``Kill'' and ``yank''
-operations push to and pop from this stack.
+items which are available for insertion into a buffer.  ``Kill'' and
+``yank'' operations push to and pop from this stack.
 
 This concept is similar to the ``Kill Ring'' in Emacs with the following
 differences:
@@ -161,8 +180,33 @@ by default.
 * Built-in Units::
 @end menu
 
-Sites, units and operations are the basic concepts from which most
-desired behaviors can be constructed.  Here are a few examples:
+@ref{term-site,Sites}, @ref{term-unit,units} and
+@ref{term-operation,operations} are the basic concepts from which most
+desired behaviors can be constructed.
+
+@itemize
+@item
+
+The site controls where the operation is applied via the point and
+possibly mark cursor.  The site also provides additional context such as
+the history of previous operations, the mark stack and the insertion
+stack.
+
+@item
+
+The unit, together with the point cursor and possibly the mark cursor,
+controls to which buffer items the operation should be applied.  Many
+operations accept a direction argument which also influences the
+processed items.
+
+@item
+
+The operation selects the basic behavior.
+
+@end itemize
+
+Here are a few examples (@pxref{Equivalent Emacs Commands} for more
+examples):
 
 @multitable @columnfractions .15 .15 .15 .15 .4
 @headitem Operation @tab Unit @tab Direction   @tab Arguments    @tab Equivalent Emacs command

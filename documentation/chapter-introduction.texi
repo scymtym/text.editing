@@ -1,45 +1,79 @@
 @node Introduction
 @chapter Introduction
 
-The @sysname{} library provides manipulation functions for the contents
-of text buffers that are required by, for example, commandline
-processors, input editors and text editors.  The provided functionality
-includes
+The @sysname{} library provides protocols and implementations of those
+protocols for text editing operations which are required by, for
+example, text editors or commandline processors (like REPLs).  Some of
+the concepts and naming used in this library are inspired by Emacs but
+the functionality should be generic enough to be build other kinds of
+Editors as well.  This library relies on the
+@uref{https://github.com/Robert-Strandh/cluffer,Cluffer library} for the
+fundamental concepts of buffers, lines and cursors.
+
+The functionality provided by this library includes:
 
 @itemize
 
-@item Cursor movement (by various ``units'')
+@item
+@ref{Motion Operations,Cursor movement} (by various ``@ref{term-unit,units}'')
 
-@item Insertion and deletion (by various ``units'')
+@item
+@ref{Insertion Operations,Insertion} and @ref{Deletion
+Operations,deletion} (by various ``units'')
 
-@item Transformations (for example changing case or transposing)
+@item
+Transformations like
+@ref{Generic-Function text.editing|change-case,changing case}
+or @ref{Generic-Function text.editing|transpose,transposing}
 
-@item Operations on expression (like paredit for Emacs)
+@item
+Operations on expression (like
+@uref{https://paredit.org/,paredit for Emacs}, work in progress)
 
-@item Undo (not yet implemented)
+@item
+Undo (work in progress)
 
-@item Killing, copying and inserting
+@item
+@ref{Copy and Yank Operations,Killing@comma{} copying and inserting}
 
-@item Multiple cursors
+@item
+@ref{Multiple Sites Protocol,Multiple cursors}
 
-@item Search
+@item
+Search (work in progress)
 
-@item Abbreviations (work in progress)
+@item
+Abbreviations (work in progress)
 
 @end itemize
 
-@sysname{} does not provide
+The @sysname{} library does not provide:
 
 @itemize
 
-@item Data structures for editor buffers (the cluffer library does that)
+@item
+Data structures for editor buffers (the
+@uref{https://github.com/robert-strandh/cluffer,Cluffer library} does
+that)
 
-@item Input handling or a command processor
+@item
+Input handling or a command processor (This aspect obviously heavily
+depends on the application and there are many ways to do it.
+@uref{https://codeberg.org/McCLIM/McCLIM, McCLIM} is one library
+provides both input handling and command processing.)
 
-@item Advance parsing (see TODO for that)
+@item
+Advance parsing (the
+@uref{https://github.com/robert-strandh/incrementalist,Incrementalist library}
+does that)
 
-@item Syntax highlighting (see TODO for that)
+@item
+Syntax highlighting
 
-@item Presentation/rendering/display functions for the contents of text buffers
+@item
+Presentation/rendering/display functions for the contents of text
+buffers (Like command processing, this aspect heavily depends on the
+application it.  Again, @uref{https://codeberg.org/McCLIM/McCLIM,
+McCLIM} is one library that could be used.)
 
 @end itemize
