@@ -37,20 +37,6 @@
     (format t "@anchor{unit-~(~A~)}~:*@t{~(~A~)} @tab ~{~(~A~)~^, ~}@tab ~A~2%"
             name superclass-names documentation)))
 
-(defun emit-unit-descriptions ()
-  (a:with-output-to-file (*standard-output* "generated-builtin-units.texi"
-                                            :if-exists :supersede)
-    (let ((title "Built-in Units"))
-      (emit-section title :level "subsection")
-      (format t "@multitable @columnfractions .2 .2 .6~%")
-      (format t "@headitem Name @tab Super-units @tab Description~%")
-      (let ((sorted (sort (copy-list (edit:all-units)) #'string<
-                          :key (a:compose #'class-name #'class-of))))
-        (mapc #'emit-unit-description sorted))
-      (format t "~2%@end multitable~2%")
-      ;;
-      (emit-unit-graph *standard-output*))))
-
 (defstruct node value children)
 
 (defun emit-unit-graph (stream)
@@ -71,16 +57,40 @@
         (unless (null remaining)
           (error "~@<Missed unit~P ~{~A~^, ~}.~@:>"
                  (length remaining) remaining))
-        (format stream "@verbatim~%")
+        (format stream "@example~%")
         (let ((utilities.print-tree:*use-unicode?* nil))
           (utilities.print-tree:print-tree
            *standard-output* root
            (utilities.print-tree:make-node-printer
             (lambda (stream depth node)
               (declare (ignore depth))
-              (princ (class-name (node-value node)) stream))
+              (let* ((class (node-value node))
+                     (name  (string-downcase (class-name class))))
+                (if (null (sb-mop:class-direct-subclasses class))
+                    (format stream "@ref{unit-~A,~:*~A}" name)
+                    (write-string name stream))))
             nil #'node-children)))
-        (format stream "~&@end verbatim~%")))))
+        (format stream "~&@end example~%")))))
+
+(defun emit-unit-descriptions ()
+  (a:with-output-to-file (*standard-output* "generated-builtin-units.texi"
+                                            :if-exists :supersede)
+    (let ((title "Built-in Units"))
+      (emit-section title :level "subsection")
+      ;; Unit class table
+      (format t "~@<The following units are provided by the @sysname{} ~
+                 library by default.  Users of the library can define ~
+                 additional units.~@:>~2%")
+      (format t "@multitable @columnfractions .2 .2 .6~%")
+      (format t "@headitem Name @tab Super-units @tab Description~%")
+      (let ((sorted (sort (copy-list (edit:all-units)) #'string<
+                          :key (a:compose #'class-name #'class-of))))
+        (mapc #'emit-unit-description sorted))
+      (format t "~2%@end multitable~2%")
+      ;; Unit class hierarchy
+      (format t "~@<The hierarchy of built-in unit classes looks like ~
+                 this:~@:>~2%")
+      (emit-unit-graph *standard-output*))))
 
 (emit-unit-descriptions)
 
