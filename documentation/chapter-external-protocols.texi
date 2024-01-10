@@ -354,7 +354,7 @@ If @var{site} is the primary site of @var{buffer}, signal an error.
 @end deffn
 
 @defgena{push-site-at,text.editing} buffer line position
-Create a new site at @var{line} and @var{position} and attached it to
+Create a new site at @var{line} and @var{position} and attach it to
 @var{buffer}.
 
 @var{line} and @var{position} control the location of the point cursor
@@ -364,7 +364,7 @@ Return the new site.
 @end deffn
 
 @defgena{push-site-relative,text.editing} buffer unit direction
-Create a new site relative to the primary site and attached it to
+Create a new site relative to the primary site and attach it to
 @var{buffer}.
 
 @var{unit} and @var{direction} control the location of the point cursor
