@@ -30,12 +30,11 @@ generated-builtin-units.texi generated-chapter-equivalent-emacs-commands.texi: \
   ../tools/generate-documentation.lisp                                         \
   ../code/unit.lisp                                                            \
   ../data/emacs-equivalence.sexp
-	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit     \
-	  --load "$(QUICKLISP_DIRECTORY)/setup.lisp"                         \
-	  --eval '(asdf:initialize-source-registry $(ASDF_SOURCE_REGISTRY))' \
-	  --eval '(ql:quickload "text.editing")'                             \
-	  --eval '(ql:quickload "utilities.print-tree")'                     \
-	  --load '../tools/generate-documentation.lisp'                      \
+	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit                 \
+	  --load "$(QUICKLISP_DIRECTORY)/setup.lisp"                                     \
+	  --eval '(asdf:initialize-source-registry $(ASDF_SOURCE_REGISTRY))'             \
+	  --eval '(ql:quickload (list "text.editing" "utilities.print-tree") :silent t)' \
+	  --load '../tools/generate-documentation.lisp'                                  \
 	  --quit
 
 #generated-chapter-changelog.texi: ../changes.sexp ../tools/write-changelog.lisp
