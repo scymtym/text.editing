@@ -669,7 +669,7 @@ The copy and yank protocol offers higher-level functions that implement
 typical copy and yank operations which abstract from the details of the
 lower-level @ref{Insertion Stack Protocol}.
 
-@defgena{yank,text.editing} site @pkey{} direction
+@defgena{yank,text.editing} site direction @pkey{} pop
 Insert top insertion stack entry of @var{site} at the point of
 @var{site}.
 
@@ -679,6 +679,9 @@ before or after the point cursor of @var{site}.
 @var{direction} controls whether the items are inserted before or after
 the point cursor, or equivalently, whether the point cursor moves to the
 beginning or end of the inserted items after the insertion.
+
+@var{pop} controls whether the top entry of the insertion stack should
+be popped off.
 @end deffn
 
 @defgena{copy,text.editing} site unit direction
