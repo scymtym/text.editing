@@ -46,17 +46,17 @@ $(NAME).info: $(INPUTS) $(FIGURES)
 $(NAME).pdf: $(INPUTS) $(FIGURES)
 	texi2pdf $(NAME).texi
 
-$(NAME).html: $(INPUTS) $(FIGURES) $(wildcard *.css)
+# Texinfo produces text.html instead of text.editing.html for some reason
+# But only for HTML.
+text.html: $(INPUTS) $(FIGURES) $(wildcard *.css)
 	makeinfo --html --no-split --no-headers \
 	         --css-include=style-common.css --css-include=style-single.css \
 	         $(NAME).texi
-        # Texinfo produce text.html for some reason
-	@if [ -e text.html ] ; then \
-	    mv text.html $@ ;       \
-	fi
+$(NAME).html: text.html
+	cp text.html $@
 
 clean:
-	rm -f *.cp *.cps *.fn *.fns \
-	      *.aux *.toc *.log \
-	      $(NAME).info $(NAME).pdf $(NAME).html \
+	rm -f *.cp *.cps *.fn *.fns                           \
+	      *.aux *.toc *.log                               \
+	      $(NAME).info $(NAME).pdf $(NAME).html text.html \
 	      $(GENERATED)
