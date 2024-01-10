@@ -279,7 +279,12 @@ The returned object implements the @ref{Insertion Stack Protocol}.
 @section Buffer Protocols
 
 This section describes protocols for buffers and mixin classes which
-provide default implementations of the protocols.
+provide default implementations of the protocols.  The described
+protocols are extensions of the Cluffer protocols for buffers in the
+sense that objects which are used with the protocols described here must
+also implement the Cluffer protocols.  Similarly, the mixin classes are
+intended to be mixed into classes that are also subclasses of the buffer
+classes provided by Cluffer.
 
 @menu
 * Primary Site Protocol::
