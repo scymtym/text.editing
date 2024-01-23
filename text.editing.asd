@@ -42,7 +42,17 @@
                               (:file "changing-case")
                               (:file "transposing")
                               (:file "filling")
-                              (:file "commenting"))))
+                              (:file "commenting")))
+
+                (:module     "search"
+                 :pathname   "code/search"
+                 :depends-on ("code")
+                 :serial     t
+                 :components ((:file "package")
+                              (:file "conditions")
+                              (:file "state")
+                              (:file "buffer-mixin")
+                              (:file "operations"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
@@ -69,7 +79,15 @@
                               ;; Additional operations
                               (:file "changing-case")
                               (:file "transposing")
-                              (:file "filling"))))
+                              (:file "filling")))
+
+                (:module     "search"
+                 :pathname   "test/search"
+                 :depends-on ("test") ; for test utilities
+                 :serial     t
+                 :components ((:file "package")
+                              (:file "utilities")
+                              (:file "operations"))))
 
   :perform     (test-op (operation component)
                  (uiop:symbol-call '#:text.editing.test '#:run-tests)))

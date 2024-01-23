@@ -1,0 +1,518 @@
+@node Search
+@chapter Search
+
+This chapter describes functions for ordinary search as well as
+incremental search.
+
+@cindex ordinary search
+The @dfn{ordinary search} operation accepts a query sequence and moves the
+@ref{term-point,point} cursors from their current locations either
+forward or backward to the nearest occurrence of the query sequence in
+the buffer, if any.
+
+@cindex incremental search
+The @dfn{incremental search} operation, on the other hand, maintains a
+mutable current query sequence which the client can extend or truncate,
+as well as a set of current matches.  Extending or truncating the query
+shrinks or grows the set of matches as fewer or more sub-sequences in
+the buffer match the current query sequence.  The @ref{term-point,point}
+cursors are typically moved to the locations of certain matches, for
+example the nearest match following the location of a given cursor,
+during the incremental search.  The association between cursors and
+matches can be changed so that point cursors can ``jump'' from one match
+to the next or previous match.
+
+The search functionality is provided as a separate module which uses the
+@t{@toppackage{}.search} package.
+
+@menu
+* Search Concepts::
+* Search Dictionary::
+@end menu
+
+@node Search Concepts
+@section Search Concepts
+
+The high-level overview for an interactive, incremental search operation
+in a buffer is something like this:
+
+@enumerate
+
+@item
+
+The client performs the operation to start an incremental search in a
+given buffer which creates a
+@ref{term-buffer-search-state,buffer search state} and
+@ref{term-site-search-state,site search states} for that buffer.  The
+query sequence and set of @ref{term-match,matches} are initially empty.
+
+@item
+
+The client repeatedly updates the search state:
+
+@enumerate
+
+@item
+
+Based on user commands, the client uses operations to extend or truncate
+the query sequence or to move point cursors between matches or to change
+parameters of the search operation like case sensitivity.
+
+@item
+
+The set of matches is updated or recomputed.  The associations between
+point cursors and matches are updated.  Point cursors are moved to new
+locations.
+
+@item
+
+The client displays the updated search state, in particular the current
+set of matches and point cursor locations to the user.
+
+@end enumerate
+
+@item
+
+Based on user commands, the client finishes or aborts the incremental
+search to either leave all point cursors where the previous operations
+positioned them or reset all point cursors to their locations prior to
+the incremental search.  Alternatively, the client may finish the
+incremental search by converting the final set of matches to sites.
+
+@end enumerate
+
+@table @dfn
+
+@item Buffer Search State
+
+During search operations, a @anchor{term-buffer-search-state}
+@dfn{buffer search state} is associated with the buffer in which the
+operation is performed.  This search state consists of parameters, state
+and results of the search operation such as:
+
+@itemize
+
+@item
+The buffer region in which the search operation is performed.
+
+@item
+The current query sequence of which occurrences should be found.
+
+@item
+Parameters like the case sensitivity of the search operation.
+
+@item
+The current set of @ref{term-match,matches}.
+
+@end itemize
+
+@item Match
+
+A @anchor{term-match} @dfn{match} consists of a start cursor and an end
+cursor which delimit a sequence of buffer items that matches the query
+string.  A match has an associated previous match and an associated next
+match either or both of which can be the match itself (if the set of
+current matches has a single element).
+
+@item Site Search State
+
+During search operations, a @anchor{term-site-search-state} @dfn{site
+search state} which consists of a start location, that is the location
+of the point cursor prior to the start of the search, and a current
+match is associated with each site.
+
+@end table
+
+@node Search Dictionary
+@section Search Dictionary
+
+@menu
+* Search Conditions::
+* Search State Protocol::
+* Match Protocol::
+* Site Search State Protocol::
+* Buffer Search State Protocol::
+* Ordinary Search Operations::
+* Incremental Search Operations::
+@end menu
+
+@node Search Conditions
+@subsection Search Conditions
+
+The conditions of the following types are signaled by functions in the
+search module:
+
+@defclassa{already-in-incremental-search-error,@toppackage{}.search}
+An error of this type is signaled when an operation that starts an
+incremental search is performed when an incremental search is already
+associated with the buffer.
+@end deftp
+
+@defclassa{not-in-incremental-search-error,@toppackage{}.search}
+An error of this type is signaled when an operation that works only in
+the context of an incremental search is performed when no incremental
+search is associated with the buffer.
+@end deftp
+
+@defclassa{no-next-match-error,@toppackage{}.search}
+An error of this type is signaled when the
+@ref{Generic-Function @toppackage{}.search|next-match,next-match}
+operation is performed on a cursor for which there is no following match
+and @t{wrap-around} is false.
+@end deftp
+
+@defclassa{no-previous-match-error,@toppackage{}.search}
+An error of this type is signaled when the
+@ref{Generic-Function @toppackage{}.search|previous-match,previous-match}
+operation is performed on a cursor for which there is no preceding match
+and @t{wrap-around} is false.
+@end deftp
+
+@node Search State Protocol
+@subsection Search State Protocol
+
+The search state protocol specifies generic functions that operate on a
+@ref{term-buffer-search-state,buffer search state} while an incremental
+search is being performed.
+
+The search state protocol extends the @ref{Detach Protocol}, that is,
+search states can (and must) be detached.  When detached, a search state
+detaches all its matches.
+
+@defgena{start,@toppackage{}.search} search-state
+Return a cursor that represents the buffer location at which the
+incremental search represented by @var{search-state} started.
+@end deffn
+
+@defgena{query,@toppackage{}.search} search-state
+Return the current query sequence for @var{search-state}.
+
+The returned sequence must not be modified.
+@ref{Generic-Function @toppackage{}.search|extend-query,extend-query}
+and
+@ref{Generic-Function @toppackage{}.search|truncate-query,truncate-query}
+must be used instead.
+@end deffn
+
+@defgena{case-mode,@toppackage{}.search} search-state
+Return the case mode, which is either @t{:ignore} or @t{:match}, of
+@var{search-state}.
+@end deffn
+
+@defgena{(setf case-mode),@toppackage{}.search} new-value search-state
+Set the case mode of @var{search-state} to @var{new-value} which must be
+either @t{:ignore} or @t{:match}.
+
+Calling this function causes @var{search-state} to be rebuilt via
+@ref{Generic-Function @toppackage{}.search|rebuild-state,rebuild-state}.
+@end deffn
+
+@defgena{match-count,@toppackage{}.search} search-state
+Return the number of @ref{term-match,matches} contained in
+@var{search-state}.
+@end deffn
+
+@defgena{map-matches,@toppackage{}.search} function search-state
+Call @var{function} with each @ref{term-match,match} in
+@var{search-state}.
+@end deffn
+
+@defgena{matches,@toppackage{}.search} search-state
+Return a sequence of the @ref{term-match,matches} in @var{search-state}.
+@end deffn
+
+@defgena{add-match,@toppackage{}.search} search-state buffer start end
+Add a match in @var{buffer} between the cursors @var{start} and
+@var{end} to @var{search-state}.
+
+Return the newly created match object.
+@end deffn
+
+@defgena{remove-match,@toppackage{}.search} search-state buffer match
+Remove @var{match} from @var{search-state}.
+
+The default method on this generic function
+@ref{Detach Protocol,detaches} @var{match} and, if a site search state
+refers to @var{match}, replaces that reference with another match.
+@end deffn
+
+@defgena{initial-matches,@toppackage{}.search} search-state
+Compute the initial matches for @var{search-state} based on the
+@ref{Generic-Function @toppackage{}.search|start,start} cursor and the
+@ref{Generic-Function @toppackage{}.search|query,query} sequence.
+
+Call @ref{Generic-Function @toppackage{}.search|add-match,add-match} for
+each computed match.
+@end deffn
+
+@defgena{rebuild-state,@toppackage{}.search} search-state
+Rebuild @var{search-state} from scratch, that is remove the current
+matches and use
+@ref{Generic-Function @toppackage.search|initial-matches,initial-matches}
+to compute new matches.
+@end deffn
+
+@c @a{{extend-query,@toppackage{}.search,@toppackage{}.search} search-state item
+@c @end deffn
+@c
+@c @defgena{truncate-query,@toppackage{}.search} search-state @pkey{} count
+@c @end deffn
+
+@defgena{finish,@toppackage{}.search} search-state
+Finish the incremental search represented by @var{search-state} leaving
+all @ref{term-point,point} cursors at their current locations.
+@end deffn
+
+@defgena{abort,@toppackage{}.search} search-state
+Abort the incremental search represented by @var{search-state} moving
+all @ref{term-point,point} cursors the locations at which they were
+positioned before the incremental search started.
+@end deffn
+
+@defgena{description,@toppackage{}.search} search-state @pkey{} comment
+@end deffn
+
+@node Match Protocol
+@subsection Match Protocol
+
+The match protocol extends the @ref{Detach Protocol}, that is matches
+can (and must) be detached.
+
+@defgena{next,@toppackage{}.search} match
+Return the next match after @var{match} or @t{nil} if there is no next
+match.
+@end deffn
+
+@defgena{previous,@toppackage{}.search} match
+Return the previous match before @var{match} or @t{nil} if there is no
+previous match.
+@end deffn
+
+@deffn {Generic Function} {start [@toppackage{}.search]} match
+Return a cursor which marks the start of @var{match}.
+@end deffn
+
+@defgena{end,@toppackage{}.search} match
+Return a cursor which marks the end of @var{match}.
+@end deffn
+
+@defgena{item-matches-p,@toppackage{}.search} state match query-item
+Indicate whether @var{match} extended with @var{query-item} matches the
+buffer sub-sequence corresponding to @var{match}.
+@end deffn
+
+@node Site Search State Protocol
+@subsection Site Search State Protocol
+
+The site search state protocol extends the @ref{Detach Protocol}, that
+is site search states can (and must) be detached.
+
+@deffn {Generic Function} {start [@toppackage{}.search]} site-search-state
+Return a cursor which indicates the location at which the
+@ref{term-point,point} cursor of the site associated with
+@var{site-search-state} was positioned before the start of the
+incremental search.
+@end deffn
+
+@defgena{match,@toppackage{}.search} site-search-state
+Return the @ref{term-match,match} associated with
+@var{site-search-state} or @t{nil}.
+@end deffn
+
+@defclassa{site-search-state,@toppackage{}.search}
+Instances of this class store a start cursor and a
+@ref{term-match,match} that should be associated with a
+@ref{term-site,site} in the context of an incremental search.
+@end deftp
+
+@node Buffer Search State Protocol
+@subsection Buffer Search State Protocol
+
+The sole purpose of the buffer search state protocol is retrieving the
+@ref{term-buffer-search-state,search state} associated with a given
+buffer:
+
+@defgena{search-state,@toppackage{}.search} buffer
+Return the @ref{term-buffer-search-state,search state} associated with
+@var{buffer} or @t{nil} if there is none.
+@end deffn
+
+@defclassa{search-state-mixin,@toppackage{}.search}
+This class is intended to be mixed into buffer classes that implement
+the buffer search state protocol.
+
+Methods on
+@ref{Generic-Function @toppackage{}.search|add-match,add-match}
+and
+@ref{Generic-Function @toppackage{}.search|remove-match,remove-match}
+specialized to this class take care of associating sites (or the site)
+of the buffer with the nearest match(es) as matches are added and
+removed.
+@end deftp
+
+@node Ordinary Search Operations
+@subsection Ordinary Search Operations
+
+@defgena{search,@toppackage{}.search} target query direction
+Search for occurrences of @var{query} in the underlying buffer of
+@var{target} from each site in @var{direction}.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the search will include all sites of the underlying buffer.
+
+@var{query} is the sequence of items to search for.
+
+@var{direction} can be either @t{:forward} or @t{:backward} and controls
+in which direction point cursors should move towards the nearest
+occurrence of @var{query} in the buffer.
+
+TODO case mode etc.
+@end deffn
+
+@node Incremental Search Operations
+@subsection Incremental Search Operations
+
+@defgena{incremental-search,ext.editing.search} target direction
+Start an incremental search in the underlying buffer of @var{target}.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the incremental search will include all sites of the underlying
+buffer.
+
+Create a @ref{term-buffer-search-state,buffer search state} and
+associate it with the underlying buffer of @var{target}.  The search
+state starts out with an empty query sequence and an empty set of
+@ref{term-match,matches}.  For each @ref{term-site,site} in the buffer,
+create a @ref{term-site-search-state,site search state} that is
+initially not associated with any match (as there are no matches
+initially).  Return the created buffer search state.
+
+If there already is an incremental search associated with @var{target},
+signal an error of type
+@ref{Class @toppackage{}.search|already-in-incremental-search-error,already-in-incremental-search-error}.
+@end deffn
+
+@defgena{finish-incremental-search,@toppackage{}.search} target
+Finish the incremental search associated with @var{target}
+
+Keep all point cursors at the locations to which they were moved due to
+search operations.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the incremental search will include all sites of the underlying
+buffer.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn
+
+@defgena{abort-incremental-search,@toppackage{}.search} target
+Abort the incremental search associated with @var{target}.
+
+In particular, move all involved point cursors back to the locations at
+which they resided before the incremental search started.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the incremental search will include all sites of the underlying
+buffer.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn
+
+@defgena{convert-matches-to-sites,@toppackage{}.search} target
+Finish the search involving @var{target}, and add a @ref{term-site,site}
+at the location of each @ref{term-match,match} (except for the match
+that is associated with the primary site).
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the operation will affect the incremental search state associated
+with the underlying buffer.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class
+@toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+
+@quotation warning
+Performing this operation on an incremental search state that already
+involves more than one site is currently not supported.  A suitable
+behavior for that situation may be specified in the future.
+@end quotation
+@end deffn
+
+@defgena{extend-query,@toppackage{}.search} target item
+Add @var{item} at the end of the query sequence of the incremental
+search associated with @var{target}.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the operation will affect the incremental search state associated
+with the underlying buffer.
+
+Extending the query sequence can lead to matches being modified or
+removed from the current set of matches.  Point cursors can also move to
+different locations as a result.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn
+
+@defgena{truncate-query,@toppackage{}.search} target @pkey{} count
+Remove @var{count} items from the end of the query sequence of the
+incremental search associated with @var{target}.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the operation will affect the incremental search state associated
+with the underlying buffer.
+
+@var{count} is a positive integer no greater than the length of the
+query sequence.
+
+Truncating the query sequence can lead to matches being modified and new
+matches being added to the current set of matches.  Point cursors can
+also move to different locations as a result.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn
+
+@defgena{next-match,@toppackage{}.search} target @pkey{} wrap-around
+In the search involving @var{target}, move all point cursors to the
+respective next match.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those cases,
+the incremental search will include all sites of the underlying buffer.
+
+@var{wrap-around} controls the behavior in case there is no next match
+when a point cursor should be moved to the next match.  If
+@var{wrap-around} is false and there is no next match, signal an error of
+type
+@ref{Class @toppackage{}.search|no-next-match-error,no-next-match-error}.
+
+If there is no incremental search associated with @var{target}, signal
+an error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn
+
+@defgena{previous-match,@toppackage{}.search} target @pkey{} wrap-around
+In the search involving @var{target}, move all point cursors to the
+previous match.
+
+@var{target} can be a buffer, a site or a cursor.  In any of those
+cases, the incremental search will include all sites of the underlying
+buffer.
+
+@var{wrap-around} controls the behavior in case there is no previous
+match when a point cursor should be moved to the previous match.  If
+@var{wrap-around} is false and there is no previous match, signal error
+of type
+@ref{Class @toppackage{}.search|no-previous-match-error,no-previous-match-error}.
+
+If there is no incremental search associated with @var{target}, signal an
+error of type
+@ref{Class @toppackage{}.search|not-in-incremental-search-error,not-in-incremental-search-error}.
+@end deffn

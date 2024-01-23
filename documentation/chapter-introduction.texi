@@ -40,7 +40,7 @@ Undo (work in progress)
 @ref{Multiple Sites Protocol,Multiple cursors}
 
 @item
-Search (work in progress)
+@ref{Search,Ordinary and incremental Search}
 
 @item
 Abbreviations (work in progress)
