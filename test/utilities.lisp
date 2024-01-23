@@ -20,7 +20,7 @@
            (column-number (- position line-start))
            (content       (remove placeholder string :count 1)))
       (values content line-number column-number))
-    string))
+    (values string nil nil)))
 
 (defun parse-mark-state (string)
   (multiple-value-bind (content line-number column-number)
@@ -80,7 +80,7 @@
                    (setf leaked (set-difference leaked (e:mark-stack site))))
                  buffer)
     (is (null leaked)
-        "~@<Expected no additional cursors to remain but ~ found ~A~@:>"
+        "~@<Expected no additional cursors to remain but found ~A~@:>"
         leaked)))
 
 (defun call-with-buffer (function state-designator
@@ -137,7 +137,7 @@
 
 (defun format-case (stream case &optional colon? at?)
   (declare (ignore colon? at?))
-  (destructuring-bind (operation arguments input ) case
+  (destructuring-bind (input operation &optional (arguments '())) case
     (format stream "~:[Expected~2*~;~:*For operation ~A~@[ ~{~S~^ ~}~] and ~
                     input~:@_~
                     ~:@_~
@@ -264,7 +264,7 @@
                        killed
                        buffer
                        (when input
-                         (list operation arguments input))))))
+                         (list input operation arguments))))))
 
 ;;; Operation tests
 
