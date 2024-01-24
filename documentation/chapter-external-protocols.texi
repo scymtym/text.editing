@@ -796,7 +796,7 @@ behave as described for
 @node Commenting Operations
 @subsection Commenting Operations
 
-@defgena{comment,text.editing} cursor unit direction @key{} comment-syntax
+@defgena{comment,text.editing} cursor unit direction @pkey{} comment-syntax
 Comment buffer items at or around @var{cursor} according to @var{unit}
 and @var{direction}.
 

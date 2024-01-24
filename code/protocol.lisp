@@ -107,7 +107,7 @@ the returned object."))
    "Remove the top entry from INSERTION-STACK and return the removed entry.
 
 If INSERTION-STACK is empty, signal an error of type
-INSERTION-STACK-EMPTY-ERROR."))
+`insertion-stack-empty-error'."))
 
 ;;; Preferred column protocol
 
@@ -502,6 +502,8 @@ is positioned after the operation."))
 (defgeneric fill-words (start-cursor end-cursor words
                         &rest args
                         &key prefix suffix per-line-prefix fill-column))
+
+;;; Commenting operations
 
 (defgeneric comment (cursor unit direction &key comment-syntax))
 

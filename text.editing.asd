@@ -38,7 +38,6 @@
                               (:file "items")
                               (:file "marking")
                               (:file "copying")
-                              ;; Additional operations
                               (:file "changing-case")
                               (:file "transposing")
                               (:file "filling")
@@ -76,7 +75,6 @@
                               (:file "deletion")
                               (:file "marking")
                               (:file "copying")
-                              ;; Additional operations
                               (:file "changing-case")
                               (:file "transposing")
                               (:file "filling")))

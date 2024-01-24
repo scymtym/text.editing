@@ -363,6 +363,9 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (cursor       c:cursor)
                               (unit         buffer)
                               (direction    t))
+  ;; What this does in most cases is moving the to the start/end of
+  ;; the buffer then process all items contained in the buffer towards
+  ;; and up to the opposite end of the buffer.
   (let ((opposite (opposite-direction direction)))
     (apply-from-cursor continuation cursor buffer-boundary opposite)
     (apply-from-cursor continuation cursor semi-buffer direction)))
