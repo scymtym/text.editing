@@ -47,6 +47,25 @@
              (parse-state-string state-string)
            (values content point-line-number point-column-number killed)))))))
 
+(defun parse-state-with-mark (state-specifier)
+  (multiple-value-bind (content1 point-line-number point-column-number killed)
+      (parse-state state-specifier)
+    (unless (and point-line-number point-column-number)
+      (error "~@<State string ~S does not specify point.~@:>"
+             state-specifier))
+    (multiple-value-bind (content
+                          mark-line-number mark-column-number mark-active-p)
+        (parse-mark-state content1)
+      (when (and mark-line-number
+                 (= point-line-number mark-line-number)
+                 (< mark-column-number point-column-number))
+        (decf point-column-number))
+      (values content
+              point-line-number point-column-number
+              mark-line-number mark-column-number
+              mark-active-p
+              killed))))
+
 ;;; Buffer utilities
 
 (defclass test-buffer (e:site-mixin
@@ -137,14 +156,15 @@
 
 (defun format-case (stream case &optional colon? at?)
   (declare (ignore colon? at?))
-  (destructuring-bind (input operation &optional (arguments '())) case
-    (format stream "~:[Expected~2*~;~:*For operation ~A~@[ ~{~S~^ ~}~] and ~
-                    input~:@_~
-                    ~:@_~
-                    ~<|~@;~{~A|~^~@:_~}~:>~@:_~
-                    ~:@_~
-                    , expected~]"
-            operation arguments (when input (list (split-into-lines input))))))
+  (destructuring-bind (initial-state operation &optional (arguments '())) case
+    (let ((input (a:ensure-car initial-state)))
+      (format stream "~:[Expected~2*~;~:*For operation ~A~@[ ~{~S~^ ~}~] and ~
+                      input~:@_~
+                      ~:@_~
+                      ~<|~@;~{~A|~^~@:_~}~:>~@:_~
+                      ~:@_~
+                      , expected~]"
+              operation arguments (when input (list (split-into-lines input)))))))
 
 (defun split-into-lines (string)
   (loop :with line = '()
@@ -167,47 +187,29 @@
       case-description
       label expected-line expected-position cursor-line cursor-position))
 
-(defun buffer-state (buffer)
-  (let* ((site    (e:site buffer))
-         (point   (e:point site))
+(defun site-state (site)
+  (let* ((point   (e:point site))
          (mark    (e:mark site))
          (stack   (e:insertion-stack site))
          (entries (e::entries stack))
          (killed  (map 'list #'e:insertion entries)))
-    (values (buffer-string buffer)
-            (c:line-number point)
+    (values (c:line-number point)
             (c:cursor-position point)
             (when mark (c:line-number mark))
             (when mark (c:cursor-position mark))
             (when mark (e:mark-active-p site))
             killed)))
 
-(defun is-buffer-state (expected-content
-                        expected-point-line expected-point-position
-                        expected-mark-line  expected-mark-position
-                        expected-mark-active-p
-                        expected-killed
-                        buffer
-                        &optional case-description)
+(defun is-site-state (expected-point-line expected-point-position
+                      expected-mark-line  expected-mark-position
+                      expected-mark-active-p
+                      expected-killed
+                      site
+                      &optional case-description)
   (multiple-value-bind
-        (content
-         point-line point-position mark-line mark-position mark-active-p
+        (point-line point-position mark-line mark-position mark-active-p
          killed)
-      (buffer-state buffer)
-    ;; Buffer content
-    (is (string= expected-content content)
-        "~@<~/text.editing.test::format-case/ buffer to contain~:@_~
-         ~:@_~
-         ~<|~@;~{~A|~^~@:_~}~:>~@:_~
-         ~:@_~
-         but it contains~:@_~
-         ~:@_~
-         ~<|~@;~{~A|~^~@:_~}~:>~@:_~
-         ~:@_~
-         .~@:>"
-        case-description
-        (list (split-into-lines expected-content))
-        (list (split-into-lines content)))
+      (site-state site)
     ;; Point cursor
     (is-cursor-state expected-point-line expected-point-position
                      point-line          point-position
@@ -243,28 +245,49 @@
                      case-description expected entry))))
         (map nil #'is-entry= expected-killed killed)))))
 
+(defun is-site-state* (expected-state site
+                       &optional initial-state operation arguments)
+  (multiple-value-call #'is-site-state
+    (values-list (rest (multiple-value-list
+                        (parse-state-with-mark expected-state))))
+    site (when initial-state (list initial-state operation arguments))))
+
+(defun is-buffer-state (expected-content
+                        expected-point-line expected-point-position
+                        expected-mark-line  expected-mark-position
+                        expected-mark-active-p
+                        expected-killed
+                        buffer
+                        &optional case-description)
+  ;; Buffer content
+  (let ((content (buffer-string buffer)))
+    (is (string= expected-content content)
+        "~@<~/text.editing.test::format-case/ buffer to contain~:@_~
+         ~:@_~
+         ~<|~@;~{~A|~^~@:_~}~:>~@:_~
+         ~:@_~
+         but it contains~:@_~
+         ~:@_~
+         ~<|~@;~{~A|~^~@:_~}~:>~@:_~
+         ~:@_~
+         .~@:>"
+        case-description
+        (list (split-into-lines expected-content))
+        (list (split-into-lines content))))
+  ;; Site state
+  (let ((site (e:site buffer)))
+    (is-site-state expected-point-line expected-point-position
+                   expected-mark-line  expected-mark-position
+                   expected-mark-active-p
+                   expected-killed
+                   site
+                   case-description)))
+
 (defun is-buffer-state* (expected-state buffer
-                         &optional input operation arguments)
-  (multiple-value-bind (content1 point-line-number point-column-number killed)
-      (parse-state expected-state)
-    (unless (and point-line-number point-column-number)
-      (error "~@<State string ~S does not specify point.~@:>"
-             expected-state))
-    (multiple-value-bind (content
-                          mark-line-number mark-column-number mark-active-p)
-        (parse-mark-state content1)
-      (when (and mark-line-number
-                 (= point-line-number mark-line-number)
-                 (< mark-column-number point-column-number))
-        (decf point-column-number))
-      (is-buffer-state content
-                       point-line-number point-column-number
-                       mark-line-number mark-column-number
-                       mark-active-p
-                       killed
-                       buffer
-                       (when input
-                         (list input operation arguments))))))
+                         &optional initial-state operation arguments)
+  (multiple-value-call #'is-buffer-state
+    (parse-state-with-mark expected-state)
+    buffer (when initial-state (list initial-state operation arguments))))
 
 ;;; Operation tests
 
@@ -282,6 +305,8 @@
          (signals cluffer:end-of-buffer (do-it)))
         (e:mark-not-set-error
          (signals e:mark-not-set-error (do-it)))
+        (e:mark-not-active-error
+         (signals e:mark-not-active-error (do-it)))
         (e:insertion-stack-empty-error
          (signals e:insertion-stack-empty-error (do-it)))
         (t

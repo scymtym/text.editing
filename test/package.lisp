@@ -21,6 +21,15 @@
    #:is
    #:signals)
 
+  ;; Test utilities
+  (:export
+   #:with-buffer
+   #:is-cursor-state
+   #:is-site-state
+   #:is-site-state*
+   #:is-buffer-state
+   #:is-buffer-state*)
+
   (:export
    #:run-tests))
 
