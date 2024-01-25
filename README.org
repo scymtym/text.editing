@@ -32,7 +32,7 @@
   + Operations on expression (like paredit for Emacs, work in
     progress)
 
-  + Search and incremental search (work in progress)
+  + Search and incremental search
 
   + Abbreviations (work in progress)
 
