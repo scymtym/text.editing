@@ -142,7 +142,7 @@ The beginning and end of the buffer also delimit paragraphs."))
                                       (cursor       c:cursor)
                                       (unit         t)
                                       (direction    (eql :forward)))
-  (when (and (not (typep unit '(or line-unit buffer-unit)))
+  (when (and (not (typep unit '(or line-unit buffer-unit c:cursor)))
              (c:end-of-buffer-p cursor))
     (error 'c:end-of-buffer)))
 
@@ -150,7 +150,7 @@ The beginning and end of the buffer also delimit paragraphs."))
                                       (cursor       c:cursor)
                                       (unit         t)
                                       (direction    (eql :backward)))
-  (when (and (not (typep unit '(or line-unit buffer-unit)))
+  (when (and (not (typep unit '(or line-unit buffer-unit c:cursor)))
              (c:beginning-of-buffer-p cursor))
     (error 'c:beginning-of-buffer)))
 
@@ -162,27 +162,23 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (direction    (eql :forward)))
   (let ((from-cursor cursor)
         (to-cursor   unit))
-    (apply-at-cursor-until
-     continuation from-cursor
-     (lambda (cursor)
-       (or (c:cursor= cursor to-cursor)
-           (c:end-of-buffer-p cursor)))
-     nil #'item-after-cursor*))
-  ;; (map-range! continuation cursor unit :item-key #'item-after-cursor*)
-  )
+    (apply-at-cursor-until continuation from-cursor
+                           (lambda (cursor)
+                             (or (c:cursor= cursor to-cursor)
+                                 (c:end-of-buffer-p cursor)))
+                           nil #'item-after-cursor*)))
 
-#+later (defmethod apply-from-cursor ((continuation t)
+(defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
                               (unit         c:cursor)
                               (direction    (eql :backward)))
   (let ((from-cursor cursor)
         (to-cursor   unit))
-    (apply-at-cursor-until
-     continuation from-cursor
-     (lambda (cursor)
-       (or (c:cursor= cursor to-cursor)
-           (c:beginning-of-buffer-p cursor)))
-     nil #'item-before-cursor*)))
+    (apply-at-cursor-until continuation from-cursor
+                           (lambda (cursor)
+                             (or (c:cursor= cursor to-cursor)
+                                 (c:beginning-of-buffer-p cursor)))
+                           nil #'item-before-cursor*)))
 
 ;;; Item
 
