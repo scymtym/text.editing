@@ -91,14 +91,14 @@
 ;;; depends on the mark cursor.
 
 (defgeneric compute-region-arguments (target operation unit)
-  (:method ((target t) (operation t) (unit t))
-    nil)
   (:method ((target c:cursor) (operation t) (unit c:cursor))
     (let ((point target)
           (mark  unit))
       (if (c:cursor< mark point)
           (values mark point)
           (values point mark))))
+  (:method ((target site) (operation t) (unit t))
+    (values (point target) unit))
   (:method ((target site) (operation t) (unit region))
     (let ((point (point target))
           (mark  (mark-or-error target)))
@@ -112,13 +112,22 @@
           (compute-region-arguments target operation (fallback unit))))))
 
 (defmethod perform ((target site) (operation t) &rest operation-arguments)
-  (flet ((default ()
-           (apply operation (point target) operation-arguments)))
-    (destructuring-bind (&optional unit &rest more-arguments) operation-arguments
+  (let ((setfp (typep operation '(cons (eql setf)))))
+    (destructuring-bind (&optional unit &rest more-arguments)
+        (if setfp
+            (rest operation-arguments)
+            operation-arguments)
       (if (null unit)
-          (default)
+          (let ((point (point target)))
+            (if setfp
+                (let ((new-value (first operation-arguments)))
+                  (apply (fdefinition operation)
+                         new-value point more-arguments))
+                (apply operation point operation-arguments)))
           (multiple-value-bind (new-target new-unit)
               (compute-region-arguments target operation unit)
-            (if new-target
-                (apply operation new-target new-unit more-arguments)
-                (default)))))))
+            (if setfp
+                (let ((new-value (first operation-arguments)))
+                  (apply (fdefinition operation)
+                         new-value new-target new-unit more-arguments))
+                (apply operation new-target new-unit more-arguments)))))))
