@@ -39,79 +39,107 @@ not suitable."
   (let ((input "↑foo¶bar¶for¶ofoo"))
     (with-buffer (buffer input :buffer-class 'test-buffer)
       ;; Start incremental search.
-      (e:perform buffer 's:incremental-search :forward)
-      (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
-                        input 's:incremental-search '(:forward))
+      (let ((case-description (list input 's:incremental-search '(:forward))))
+        (e:perform buffer 's:incremental-search :forward)
+        (apply #'is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Set initial query.
-      (e:perform buffer 's:extend-query "fo")
-      (is-matches-state '((0 0 0 2) (2 0 2 2) (3 1 3 3))
-                        (s:search-state buffer) input 's:extend-query)
-      (is-buffer-state* "fo↑o¶bar¶for¶ofoo" buffer
-                        input 's:extend-query '("foo"))
+      (let ((case-description (list input 's:extend-query '("fo"))))
+        (e:perform buffer 's:extend-query "fo")
+        (apply #'is-matches-state
+               '((0 0 0 2) (2 0 2 2) (3 1 3 3)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "fo↑o¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Extend query, removing one match.
-      (e:perform buffer 's:extend-query #\o)
-      (is-matches-state '((0 0 0 3) (3 1 3 4))
-                        (s:search-state buffer) input 's:extend-query '(#\o))
-      (is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
-                        input 's:extend-query '(#\o))
+      (let ((case-description (list input 's:extend-query '(#\o))))
+        (e:perform buffer 's:extend-query #\o)
+        (apply #'is-matches-state
+               '((0 0 0 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Truncate query, regaining the third match.
-      (e:perform buffer 's:truncate-query)
-      (is-matches-state '((0 0 0 2) (2 0 2 2) (3 1 3 3))
-                        (s:search-state buffer) input 's:truncate-query)
-      (is-buffer-state* "fo↑o¶bar¶for¶ofoo" buffer input 's:truncate-query)
+      (let ((case-description (list input 's:truncate-query)))
+        (e:perform buffer 's:truncate-query)
+        (apply #'is-matches-state
+               '((0 0 0 2) (2 0 2 2) (3 1 3 3)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "fo↑o¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Switch to third match
-      (e:perform buffer 's:next-match)
-      (is-buffer-state* "foo¶bar¶fo↑r¶ofoo" buffer input 's:next-match)
-      (e:perform buffer 's:next-match)
-      (is-buffer-state* "foo¶bar¶for¶ofo↑o" buffer input 's:next-match)
+      (let ((case-description (list input 's:next-match)))
+        (e:perform buffer 's:next-match)
+        (apply #'is-buffer-state* "foo¶bar¶fo↑r¶ofoo" buffer
+               case-description))
+      (let ((case-description (list input 's:next-match)))
+        (e:perform buffer 's:next-match)
+        (apply #'is-buffer-state* "foo¶bar¶for¶ofo↑o" buffer
+               case-description))
       ;; Finish incremental search. Point cursor should remain at the
       ;; third match.
-      (e:perform buffer 's:finish-incremental-search)
-      (is (null (s:search-state buffer)))
-      (is-buffer-state* "foo¶bar¶for¶ofo↑o" buffer
-                        input 's:finish-incremental-search))))
+      (let ((case-description (list input 's:finish-incremental-search)))
+        (e:perform buffer 's:finish-incremental-search)
+        (is (null (s:search-state buffer)))
+        (apply #'is-buffer-state* "foo¶bar¶for¶ofo↑o" buffer
+               case-description)))))
 
 (test incremental-search.abort
   "Test aborting an incremental search."
   (let ((input "↑foo¶bar¶for¶ofoo"))
     (with-buffer (buffer input :buffer-class 'test-buffer)
       ;; Start incremental search.
-      (e:perform buffer 's:incremental-search :forward)
-      (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
-                        input 's:incremental-search '(:forward))
+      (let ((case-description (list input 's:incremental-search '(:forward))))
+        (e:perform buffer 's:incremental-search :forward)
+        (apply #'is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Set query.
-      (e:perform buffer 's:extend-query "foo")
-      (is-matches-state '((0 0 0 3) (3 1 3 4))
-                        (s:search-state buffer) input 's:extend-query '("foo"))
-      (is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer input 's:extend-query '("foo"))
+      (let ((case-description (list input 's:extend-query '("foo"))))
+        (e:perform buffer 's:extend-query "foo")
+        (apply #'is-matches-state
+               '((0 0 0 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Next match.
-      (e:perform buffer 's:next-match)
-      (is-buffer-state* "foo¶bar¶for¶ofoo↑" buffer input 's:next-match)
+      (let ((case-description (list input 's:next-match)))
+        (e:perform buffer 's:next-match)
+        (apply #'is-buffer-state* "foo¶bar¶for¶ofoo↑" buffer
+               case-description))
       ;; Abort incremental search. Point cursor should return to
       ;; original location.
-      (e:perform buffer 's:abort-incremental-search)
-      (is (null (s:search-state buffer)))
-      (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
-                        input 's:abort-incremental-search))))
+      (let ((case-description (list input 's:abort-incremental-search)))
+        (e:perform buffer 's:abort-incremental-search)
+        (is (null (s:search-state buffer)))
+        (apply #'is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
+               case-description)))))
 
 (test incremental-search.convert-matches-to-sites
-  "Test converting matches into sites."
+  "Test converting matches to sites."
   (let ((input "↑foo¶bar¶for¶ofoo"))
     (with-buffer (buffer input :buffer-class 'multiple-site-test-buffer)
-      (e:perform buffer 's:incremental-search :forward)
-      (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
-                        input 's:incremental-search '(:forward))
-
-      (e:perform buffer 's:extend-query "foo")
-      (is-matches-state
-       '((0 0 0 3) (3 1 3 4))
-       (s:search-state buffer) input 's:extend-query '("foo"))
-      (is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer input 's:extend-query)
-
-      (e:perform buffer 's:convert-matches-to-sites)
-      (is (null (s:search-state buffer)))
-      (is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
-                        input 's:convert-matches-to-sites))))
+      ;; Start incremental search.
+      (let ((case-description (list input 's:incremental-search '(:forward))))
+        (e:perform buffer 's:incremental-search :forward)
+        (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer case-description))
+      ;; Set query.
+      (let ((case-description (list input 's:extend-query '("foo"))))
+        (e:perform buffer 's:extend-query "foo")
+        (apply #'is-matches-state
+               '((0 0 0 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
+               case-description))
+      ;; Convert matches to sites.
+      (let ((case-description (list input 's:convert-matches-to-sites)))
+        (e:perform buffer 's:convert-matches-to-sites)
+        (is (null (s:search-state buffer)))
+        (apply #'is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
+               case-description)
+        (let ((other (e:other-sites buffer)))
+          (is (= 1 (length other)))
+          (apply #'text.editing.test::is-site-state*
+                 "foo¶bar¶for¶ofoo↑" (first other) case-description))))))
 
 (test incremental-search.next+previous-match
   "Test the `next-match' and `previous-match' operations."
@@ -122,11 +150,13 @@ not suitable."
       (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
                         input 's:incremental-search '(:forward))
       ;; Set query.
-      (e:perform buffer 's:extend-query "foo")
-      (is-matches-state '((0 0 0 3) (3 1 3 4))
-                        (s:search-state buffer) input 's:extend-query '(#\o))
-      (is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
-                        input 's:extend-query '(#\o))
+      (let ((case-description (list input 's:extend-query '("foo"))))
+        (e:perform buffer 's:extend-query "foo")
+        (apply #'is-matches-state
+               '((0 0 0 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "foo↑¶bar¶for¶ofoo" buffer
+               case-description))
       ;; Next match. Possible without wrapping.
       (e:perform buffer 's:next-match)
       (is-buffer-state* "foo¶bar¶for¶ofoo↑" buffer input 's:next-match)
