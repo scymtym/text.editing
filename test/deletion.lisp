@@ -81,6 +81,25 @@
     ("hello¶world.¶¶↑line 2" "hello¶world.¶¶↑"     "↑line 2")
     ("hello¶world.¶¶line 2↑" 'c:end-of-buffer      "hello¶world.¶¶↑"))))
 
+(test delete.region
+  "Smoke test for applying the `delete' operation to regions."
+  ;; This is a separate test because it must use :target :buffer
+  ;; instead of :target :point so that both the point and the mark
+  ;; cursor are available.
+  (operation-cases (e:delete :target :buffer)
+   ((e:region (:forward #+later :backward))
+    ("↑hello world"  'e:mark-not-set-error                  #+later 'e:mark-not-set-error)
+    ("↑hello world↓" 'e:mark-not-active-error               #+later 'e:mark-not-active-error)
+    ("↑hello world↧" '("↧↑"          :killed "hello world") #+later '("↑↧" :killed "hello world"))
+    ("↑hello ↧world" '("↧↑world"     :killed "hello ")      #+later '("↑↧" :killed "hello world"))
+    ("hello ↧wo↑rld" '("hello ↧↑rld" :killed "wo")          #+later '("↑↧" :killed "hello world")))
+   ((e:region-or-item (:forward #+later :backward))
+    ("h↑ello world"  '("h↑llo world"  :killed "e")           #+later '("↑ello world"  :killed "h"))
+    ("hello w↑orld↓" '("hello w↑rld↓" :killed "o")           #+later '("hello ↑orld↓" :killed "w"))
+    ("↑hello world↧" '("↧↑"           :killed "hello world") #+later '("↑↧"           :killed "hello world"))
+    ("↑hello ↧world" '("↧↑world"      :killed "hello ")      #+later '("↑↧"           :killed "hello world"))
+    ("hello ↧wo↑rld" '("hello ↧↑rld"  :killed "wo")          #+later '("↑↧"           :killed "hello world")))))
+
 (test delete-indentation.smoke
   "Smoke test for the `delete-indentation' operation."
   (operation-cases (e:delete-indentation)
