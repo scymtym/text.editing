@@ -175,3 +175,42 @@ not suitable."
       (is (null (s:search-state buffer)))
       (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
                         input 's:finish-incremental-search))))
+
+(test incremental-search.case-mode
+  "Test the `case-mode' and (setf case-mode) operations."
+  (let ((input "↑FOO¶bar¶foo¶ofoo"))
+    (with-buffer (buffer input :buffer-class 'test-buffer)
+      ;; Start incremental search.
+      (e:perform buffer 's:incremental-search :forward)
+      (is (eq :ignore (s:case-mode (s:search-state buffer))))
+      ;; Set query.
+      (let ((case-description (list input 's:extend-query '(#\o))))
+        (e:perform buffer 's:extend-query "foo")
+        (apply #'is-matches-state
+               '((0 0 0 3) (2 0 2 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "FOO↑¶bar¶foo¶ofoo" buffer
+               case-description))
+      ;; Change case mode.
+      (let ((case-description (list input '(setf s:case-mode) '(:match))))
+        (e:perform buffer '(setf s:case-mode) :match)
+        (is (eq :match (s:case-mode (s:search-state buffer))))
+        (apply #'is-matches-state
+               '((2 0 2 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "FOO¶bar¶foo↑¶ofoo" buffer
+               case-description))
+      ;; Change back case mode.
+      (let ((case-description (list input '(setf s:case-mode) '(:ignore))))
+        (e:perform buffer '(setf s:case-mode) :ignore)
+        (is (eq :ignore (s:case-mode (s:search-state buffer))))
+        (apply #'is-matches-state
+               '((0 0 0 3) (2 0 2 3) (3 1 3 4)) (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "FOO↑¶bar¶foo¶ofoo" buffer
+               case-description))
+      ;; Abort.
+      (e:perform buffer 's:abort-incremental-search)
+      (is (null (s:search-state buffer)))
+      (is-buffer-state* "↑FOO¶bar¶foo¶ofoo" buffer
+                        input 's:finish-incremental-search))))
