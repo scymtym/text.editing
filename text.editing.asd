@@ -73,6 +73,7 @@
                               (:file "motion")
                               (:file "insertion")
                               (:file "deletion")
+                              (:file "items")
                               (:file "marking")
                               (:file "copying")
                               (:file "changing-case")
