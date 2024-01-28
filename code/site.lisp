@@ -44,8 +44,9 @@
 
 (defmethod perform :around ((target operation-history-mixin) (operation t)
                             &rest operation-arguments)
-  (call-next-method)
-  (push-operation (list* operation operation-arguments) target))
+  (multiple-value-prog1
+      (call-next-method)
+   (push-operation (list* operation operation-arguments) target)))
 
 ;;; Mixin class `site-data-mixin'
 
