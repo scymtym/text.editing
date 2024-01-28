@@ -310,10 +310,19 @@
         (e:insertion-stack-empty-error
          (signals e:insertion-stack-empty-error (do-it)))
         (t
-         (do-it)
-         (is-buffer-state*
-          expected buffer
-          (a:ensure-car initial-state) operation arguments))))))
+         (let ((value (do-it)))
+           (destructuring-bind
+               (&key ((:state expected-state) initial-state)
+                     ((:value expected-value) nil expected-value-supplied-p))
+               (if (typep expected '(cons keyword))
+                   expected
+                   (list :state expected))
+             (when expected-value-supplied-p
+               (is (equalp expected-value value)))
+             (unless (null expected-state)
+               (is-buffer-state*
+                expected-state buffer
+                (a:ensure-car initial-state) operation arguments)))))))))
 
 (defun map-argument-combinations (function arguments)
   (if (null arguments)
@@ -336,6 +345,44 @@
        (values first-expected rest-expected)))))
 
 (defmacro operation-cases ((operation &key (target :point)) &rest clauses)
+  "Perform OPERATION (not evaluated) for test cases specified by CLAUSES.
+
+TARGET (evaluated) controls on which level OPERATION is performed and
+must be either `:point' or `:buffer'.
+
+Each clause in CLAUSES is of the form
+
+  ((ARGUMENT-DESIGNATOR₁ … ARGUMENT-DESIGNATORₙ)
+   INITIAL-STATE-DESIGNATOR EXPECTED-DESIGNATOR₁ … EXPECTED-DESIGNATORₘ)
+
+where ARGUMENT-DESIGNATORₖ evaluates to either an atom or a list of
+objects. OPERATION is (repeatedly) performed on a fresh buffer that is
+initialized according to INITIAL-STATE with each of the combinations
+of arguments that result from forming the Cartesian product of the
+argument designators (so a single combination if all designators are
+atoms). INITIAL-STATE-DESIGNATOR is of one of the forms
+
+  \"INITIAL-BUFFER-STATE\"
+  (\"INITIAL-BUFFER-STATE\" :killed INITIAL-INSERTION-STACK-STATE)
+
+The k-th resulting buffer state and/or return value is checked against
+EXPECTED-DESIGNATORₖ (evaluated) which evaluates to an object matching
+one of the following forms:
+
+  CONDITION-TYPE
+  \"EXPECTED-BUFFER-STATE\"
+  (\"EXPECTED-BUFFER-STATE\" :killed EXPECTED-INSERTION-STACK-STATE)
+  (:value EXPECTED-VALUE [:state \"EXPECTED-BUFFER-STATE\"])
+
+. When the last form is used and `:state' is not supplied, the
+resulting buffer state must match INITIAL-BUFFER-STATE, that is the
+operation must not modify the buffer state. Example:
+
+  (operation-cases (e:delete :target :buffer)
+    ((e:region (:forward :backward))
+     \"↑bar↧baz\" \"foo↑↧baz\" 'c:beginning-of-buffer))
+
+."
   (flet ((expand-clause (clause)
            (destructuring-bind ((&rest arguments) &rest sub-clauses) clause
              (flet ((expand-sub-clause (sub-clause)
