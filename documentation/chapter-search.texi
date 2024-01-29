@@ -158,14 +158,14 @@ search is associated with the buffer.
 An error of this type is signaled when the
 @ref{Generic-Function @toppackage{}.search|next-match,next-match}
 operation is performed on a cursor for which there is no following match
-and @t{wrap-around} is false.
+and @t{wrap-around} is false or there are no matches at all.
 @end deftp
 
 @defclassa{no-previous-match-error,@toppackage{}.search}
 An error of this type is signaled when the
 @ref{Generic-Function @toppackage{}.search|previous-match,previous-match}
 operation is performed on a cursor for which there is no preceding match
-and @t{wrap-around} is false.
+and @t{wrap-around} is false or there are no matches at all.
 @end deftp
 
 @node Search State Protocol
@@ -488,9 +488,9 @@ respective next match.
 the incremental search will include all sites of the underlying buffer.
 
 @var{wrap-around} controls the behavior in case there is no next match
-when a point cursor should be moved to the next match.  If
-@var{wrap-around} is false and there is no next match, signal an error of
-type
+when a point cursor should be moved to the next match.  If there is no
+next match and @var{wrap-around} is false or there are no matches at
+all, signal an error of type
 @ref{Class @toppackage{}.search|no-next-match-error,no-next-match-error}.
 
 If there is no incremental search associated with @var{target}, signal
@@ -508,8 +508,8 @@ buffer.
 
 @var{wrap-around} controls the behavior in case there is no previous
 match when a point cursor should be moved to the previous match.  If
-@var{wrap-around} is false and there is no previous match, signal error
-of type
+there is no previous match and @var{wrap-around} is false or there are
+no matches at all, signal error of type
 @ref{Class @toppackage{}.search|no-previous-match-error,no-previous-match-error}.
 
 If there is no incremental search associated with @var{target}, signal an

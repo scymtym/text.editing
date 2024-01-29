@@ -110,13 +110,23 @@
                     (unless site-state
                       (let ((buffer (c:buffer (e:point target))))
                         (error 'not-in-incremental-search-error :buffer buffer)))
-                    (let* ((match      (match site-state))
-                           (new-match  (,accessor match)))
-                      (cond (new-match
+                    ;; MATCH can be null if the query does not occur
+                    ;; in BUFFER or if the point of TARGET was
+                    ;; positioned after (in case of searching forward)
+                    ;; the last occurrence.
+                    (let* ((match    (match site-state))
+                           new-match)
+                      (cond ((null match)
+                             (let* ((buffer  (c:buffer (e:point target)))
+                                    (matches (matches (search-state buffer))))
+                               (if (or (a:emptyp matches) (not wrap-around))
+                                   (error ',condition :site target)
+                                   (setf (match site-state) ,wrap))))
+                            ((setf new-match (,accessor match))
                              (setf (match site-state) new-match))
                             (wrap-around
                              (let* ((buffer  (c:buffer (e:point target)))
-                                     (matches (matches (search-state buffer))))
+                                    (matches (matches (search-state buffer))))
                                (setf (match site-state) ,wrap)))
                             (t
                              (error ',condition :site target))))))

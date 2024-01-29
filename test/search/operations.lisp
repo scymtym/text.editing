@@ -141,8 +141,8 @@ not suitable."
           (apply #'text.editing.test::is-site-state*
                  "foo¶bar¶for¶ofoo↑" (first other) case-description))))))
 
-(test incremental-search.next+previous-match
-  "Test the `next-match' and `previous-match' operations."
+(test incremental-search.next+previous-match.smoke
+  "Smoke test for the `next-match' and `previous-match' operations."
   (let ((input "↑foo¶bar¶for¶ofoo"))
     (with-buffer (buffer input :buffer-class 'test-buffer)
       ;; Start incremental search.
@@ -175,6 +175,71 @@ not suitable."
       (is (null (s:search-state buffer)))
       (is-buffer-state* "↑foo¶bar¶for¶ofoo" buffer
                         input 's:finish-incremental-search))))
+
+(test incremental-search.next+previous-match.no-matches
+  "Test `next-match' and `previous-match' when there are no matches."
+  (let ((input "foo↑¶bar¶ofoo"))
+    (with-buffer (buffer input :buffer-class 'test-buffer)
+      ;; Start incremental search after last occurrence.
+      (e:perform buffer 's:incremental-search :forward)
+      (is-buffer-state* "foo↑¶bar¶ofoo" buffer
+                        input 's:incremental-search '(:forward))
+      ;; Set query which does not match anything.
+      (let ((case-description (list input 's:extend-query '("baz"))))
+        (e:perform buffer 's:extend-query "baz")
+        (apply #'is-matches-state '() (s:search-state buffer)
+               case-description)
+        (apply #'is-buffer-state* "foo↑¶bar¶ofoo" buffer
+               case-description))
+      ;; Next match and previous match operations signal errors with
+      ;; and without wrapping since there is never a next or previous
+      ;; match.
+      (signals s:no-next-match-error
+        (e:perform buffer 's:next-match :wrap-around nil))
+      (signals s:no-next-match-error
+        (e:perform buffer 's:next-match :wrap-around t))
+      (signals s:no-previous-match-error
+        (e:perform buffer 's:previous-match :wrap-around nil))
+      (signals s:no-previous-match-error
+        (e:perform buffer 's:previous-match :wrap-around t))
+      ;; Abort.
+      (e:perform buffer 's:abort-incremental-search)
+      (is (null (s:search-state buffer)))
+      (is-buffer-state* "foo↑¶bar¶ofoo" buffer
+                        input 's:finish-incremental-search))))
+
+(test incremental-search.next+previous-match.after-last-occurrence
+  "Test `next-match' and `previous-match' operation for search start
+after last occurrence."
+  (let ((input "foo¶bar¶o↑foo"))
+    (with-buffer (buffer input :buffer-class 'test-buffer)
+      (macrolet
+          ((test-case (operation condition)
+             `(progn
+                ;; Start incremental search after last occurrence.
+                (e:perform buffer 's:incremental-search :forward)
+                (is-buffer-state* "foo¶bar¶o↑foo" buffer
+                                  input 's:incremental-search '(:forward))
+                ;; Set query.
+                (let ((case-description (list input 's:extend-query '("bar"))))
+                  (e:perform buffer 's:extend-query "bar")
+                  (apply #'is-matches-state '((1 0 1 3)) (s:search-state buffer)
+                         case-description)
+                  (apply #'is-buffer-state* "foo¶bar¶o↑foo" buffer
+                         case-description))
+                ;; Next/previous match. Signals error unless allowed
+                ;; to wrap around.
+                (signals ,condition
+                  (e:perform buffer ',operation :wrap-around nil))
+                (e:perform buffer ',operation)
+                (is-buffer-state* "foo¶bar↑¶ofoo" buffer input ',operation)
+                ;; Abort.
+                (e:perform buffer 's:abort-incremental-search)
+                (is (null (s:search-state buffer)))
+                (is-buffer-state* "foo¶bar¶o↑foo" buffer
+                                  input 's:finish-incremental-search))))
+        (test-case s:next-match     s:no-next-match-error)
+        (test-case s:previous-match s:no-previous-match-error)))))
 
 (test incremental-search.case-mode
   "Test the `case-mode' and (setf case-mode) operations."
