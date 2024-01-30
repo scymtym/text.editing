@@ -306,9 +306,17 @@ primary point cursor and the primary mark cursor respectively.
 @node Multiple Sites Protocol
 @subsection Multiple Sites Protocol
 
+The following condition types are used in the multiple sites protocol:
+
+@defclassa{singular-site-error,@toppackage{}}
+This error is signaled if an operation that requires multiple
+@ref{term-site,sites} is performed on a buffer that contains only a
+single site.
+@end deftp
+
 An implementation of this protocol is provided by the class
 
-@defclassa{multiple-site-mixin,text.editing}
+@defclassa{multiple-site-mixin,@toppackage{}}
 This class is intended to be mixed into buffer classes that can contain
 zero or more secondary @ref{term-site,sites} in addition to the primary
 site.
@@ -316,21 +324,21 @@ site.
 
 The protocol consists of the following generic functions:
 
-@defgena{site-count,text.editing} buffer
+@defgena{site-count,@toppackage{}} buffer
 Return the total number of sites that are attached to @var{buffer}.
 
 The returned count includes the primary site.
 @end deffn
 
-@defgena{map-sites,text.editing} function buffer
+@defgena{map-sites,@toppackage{}} function buffer
 Call @var{function} with each site that is attached to @var{buffer}.
 @end deffn
 
-@defgena{sites,text.editing} buffer
+@defgena{sites,@toppackage{}} buffer
 Return the sequence of all sites which are attached to @var{buffer}.
 @end deffn
 
-@defgena{add-site,text.editing} site buffer
+@defgena{add-site,@toppackage{}} site buffer
 Add @var{site} to the sites of @var{buffer}.
 
 Return @var{site}.
@@ -342,8 +350,9 @@ If @var{site} is already one of the sites that are attached to
 @var{buffer}, signal an error.
 @end deffn
 
-@defgena{remove-site,text.editing} site buffer
-Remove @var{site} fro the sites of @var{buffer}.
+@defgena{remove-site,@toppackage{}} site buffer
+@ref{Generic-Function @toppackage{}|detach,Detach} @var{site} and remove
+it from the sites of @var{buffer}.
 
 Return @var{site}.
 
@@ -353,7 +362,7 @@ signal an error.
 If @var{site} is the primary site of @var{buffer}, signal an error.
 @end deffn
 
-@defgena{push-site-at,text.editing} buffer line position
+@defgena{push-site-at,@toppackage{}} buffer line position
 Create a new site at @var{line} and @var{position} and attach it to
 @var{buffer}.
 
@@ -363,7 +372,7 @@ of the new site.
 Return the new site.
 @end deffn
 
-@defgena{push-site-relative,text.editing} buffer unit direction
+@defgena{push-site-relative,@toppackage{}} buffer unit direction
 Create a new site relative to the primary site and attach it to
 @var{buffer}.
 
@@ -380,41 +389,53 @@ error is signaled.
 @end deffn
 
 @defgena{pop-site,text.editing} buffer
-Remove the most recently added site from @var{buffer}.
+Remove the most recently added @ref{term-site,site} from @var{buffer}.
 
 Return the removed site.
 
 If no sites beside the primary site are attached to @var{buffer},
-signal an error of type @t{singular-site-error}.
+signal an error of type
+@ref{Class @toppackage{}|singular-site-error,singular-site-error}.
 @end deffn
 
 @defgena{rotate-sites,text.editing} buffer direction
-Swap roles between the primary site and secondary sites.
+Swap roles between the primary @ref{term-site,site} and secondary sites
+in @var{buffer}.
 
 @var{direction} controls the direction of the rotation.
 
-TODO explain this properly
+If @var{direction} is @t{:forward}, sites are rotated as follows:
 
-TODO @var{direction} is ignored at the moment
+@example
+primary          @U{2190} first secondary
+first secondary  @U{2190} second secondary
+second secondary @U{2190} third secondary
+@dots{}
+last secondary   @U{2190} primary
+@end example
+
+@var{direction} @t{:backward} is not supported at the moment
 
 If no sites beside the primary site are attached to @var{buffer},
-signal an error of type @t{singular-site-error}.
+signal an error of type
+@ref{Class @toppackage{}|singular-site-error,singular-site-error}.
 @end deffn
 
-@defgena{other-sites,text.editing} buffer
+@defgena{other-sites,@toppackage{}} buffer
 Return the sequence of all sites which are attached to @var{buffer}
 except the primary site.
 @end deffn
 
-@defgena{remove-other-sites,text.editing} buffer
+@defgena{remove-other-sites,@toppackage{}} buffer
 Remove all sites from @var{buffer} except the primary site.
 @end deffn
 
 @node Operation Protocol
 @section Operation Protocol
 
-@defgena{perform,text.editing} target operation @rest{} operation-arguments
-Perform @var{operation} with @var{operation-arguments} in or on @var{target}.
+@defgena{perform,@toppackage{}} target operation @rest{} operation-arguments
+Perform @var{operation} with @var{operation-arguments} in or on
+@var{target}.
 
 @var{target} is the object in or at or on which the operation should be
 performed such as a buffer or a cursor.
