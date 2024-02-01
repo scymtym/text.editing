@@ -103,6 +103,14 @@
            (new-line (coerce-to-line new-line :buffer buffer :cursor cursor)))
       (move-cursor-to-line cursor new-line position))))
 
+;;; Place for cursor "location"
+
+(defun cursor-location (cursor)
+  (values (c:line cursor) (c:cursor-position cursor)))
+
+(defsetf cursor-location (cursor) (new-line new-position)
+  `(move-cursor-to-line ,cursor ,new-line ,new-position))
+
 ;;; Temporary cursor
 
 (defun attach-cursor (cursor line &key buffer (position 0))
