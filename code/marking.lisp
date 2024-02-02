@@ -23,9 +23,6 @@
   (let* ((point    (point site))
          (old-mark (mark site))
          (new-mark (clone-cursor point :class 'cluffer-standard-line:left-sticky-cursor)))
-    ;; TODO clone should attach
-    ;; TODO there should be a multiple-value, setf-able cursor-position
-    (move-cursor-to-line new-mark (c:line point) (c:cursor-position point))
     (when old-mark (push old-mark (mark-stack site)))
     (setf (mark-active-p site) t
           (mark          site) new-mark))) ; return new mark
@@ -70,8 +67,7 @@
     (cond ((null mark)
            (setf mark                 (clone-cursor point)
                  (mark          site) mark
-                 (mark-active-p site) t)
-           (move-cursor-to-line mark (c:line point) (c:cursor-position point)))
+                 (mark-active-p site) t))
           ((not (mark-active-p site))
            (move-cursor-to-line mark (c:line point) (c:cursor-position point))
            (setf (mark-active-p site) t)))

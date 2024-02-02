@@ -20,8 +20,16 @@
 
 (defgeneric clone-cursor (cursor &rest initargs &key class &allow-other-keys)
   (:method ((cursor c:cursor) &rest initargs &key (class (class-of cursor)))
-    (apply #'make-instance class (append (a:remove-from-plist initargs :class)
-                                         (clone-initargs cursor)))))
+    (let ((initargs (append (a:remove-from-plist initargs :class :attach)
+                            (clone-initargs cursor))))
+      (apply #'make-instance class initargs)))
+  (:method :around ((cursor c:cursor) &key (attach t) line position)
+    (let ((new-cursor (call-next-method)))
+      (when attach
+        (let ((line     (or line     (c:line cursor)))
+              (position (or position (c:cursor-position cursor))))
+          (c:attach-cursor new-cursor line position)))
+      new-cursor)))
 
 (defgeneric clone-initargs (cursor)
   (:method-combination append)

@@ -31,9 +31,7 @@
                                      (slot-names t)
                                      &key (start nil start-supplied?))
   (when start-supplied?
-    (let ((new-start (e:clone-cursor start))) ; TODO make a `clone-cursor' that duplicates the line and column
-      (e::attach-cursor new-start (c:line start) :position (c:cursor-position start))
-      (setf (slot-value instance '%start) new-start))))
+    (setf (slot-value instance '%start) (e:clone-cursor start))))
 
 (defmethod e:detach ((object site-search-state))
   (c:detach-cursor (start object)))

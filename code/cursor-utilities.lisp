@@ -154,9 +154,10 @@
                                      (cursor-class nil cursor-class-supplied?)
                                      (line         (c:line cursor))
                                      (position     (c:cursor-position cursor)))
-  (let ((clone (apply #'clone-cursor cursor (if cursor-class-supplied?
-                                                (list :class cursor-class)
-                                                '()))))
+  (let ((clone (apply #'clone-cursor cursor :attach nil
+                      (if cursor-class-supplied?
+                          (list :class cursor-class)
+                          '()))))
     (call-with-attached-cursor continuation clone buffer line position)))
 
 (defmacro with-cloned-cursor ((cursor-var cursor

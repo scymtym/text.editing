@@ -78,7 +78,7 @@
 
 (flet ((make-site (site buffer line position)
          (let* ((point     (point site))
-                (new-point (clone-cursor point)))
+                (new-point (clone-cursor point :attach nil)))
            (attach-cursor new-point line :buffer buffer :position position)
            (let* ((insertion-stack     (insertion-stack site))
                   (new-insertion-stack (clone insertion-stack))

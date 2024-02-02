@@ -106,8 +106,7 @@ content in a case sensitive manner.")
                                      &key (start nil start-supplied?)
                                           (query nil query-supplied?))
   (when start-supplied?
-    (let ((new-start (e:clone-cursor start))) ; TODO make a `clone-cursor' that duplicates the line and column
-      (e::attach-cursor new-start (c:line start) :position (c:cursor-position start))
+    (let ((new-start (e:clone-cursor start)))
       (setf (slot-value instance '%start) new-start)))
   (when query-supplied?
     (let ((stored-query (query instance))
@@ -140,14 +139,11 @@ content in a case sensitive manner.")
                       (buffer       c:buffer)
                       (start        c:cursor)
                       (end          c:cursor))
-  (let ((start-cursor (e:clone-cursor start)) ; TODO don't clone here?
-        (end-cursor   end))
-    (e::attach-cursor start-cursor (c:line start) :position (c:cursor-position start))
-    (let ((match (make-instance 'match :state search-state
-                                       :start start-cursor
-                                       :end   end-cursor)))
-      (vector-push-extend match (matches search-state))
-      match)))
+  (let ((match (make-instance 'match :state search-state
+                                     :start start
+                                     :end   end)))
+    (vector-push-extend match (matches search-state))
+    match))
 
 (defmethod remove-match ((search-state search-state)
                          (buffer       c:buffer)
@@ -168,11 +164,12 @@ content in a case sensitive manner.")
             :until (c:end-of-buffer-p scan)
             :do (when (item-matches-p search-state scan first-item)
                   (let ((match (e:clone-cursor scan)))
-                    (e::attach-cursor match (c:line scan) :position (c:cursor-position scan))
                     (if (loop :for item :across query
                               :always (item-matches-p search-state match item)
                               :do (e:move-item-forward match))
-                        (let ((match (add-match search-state buffer scan match)))
+                        (let* ((start (e:clone-cursor scan))
+                               (end   match)
+                               (match (add-match search-state buffer start end)))
                           (when previous
                             (link previous match))
                           (setf previous match))
