@@ -132,10 +132,14 @@
                              (error ',condition :site target))))))
 
                 (defmethod e:perform ((target e:site) (operation (eql ',name))
-                                      &rest args &key)
+                                      &rest args &key wrap-around)
+                  (declare (ignore wrap-around))
                   (apply (function ,name) target args))
 
-                (defmethod e:perform :after ((target c:buffer) (operation (eql ',name)) &key)
+                (defmethod e:perform :after ((target    c:buffer)
+                                             (operation (eql ',name))
+                                             &key wrap-around)
+                  (declare (ignore wrap-around))
                   (update-buffer-for-search-state target)))))
   (define next-match
     next     (aref matches 0)                     no-next-match-error)
