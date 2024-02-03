@@ -11,7 +11,7 @@
 
 @paragraphindent 0
 
-@setfilename text.editing
+@setfilename text.editing.info
 @settitle @sysname{} User's Manual
 
 @copying
