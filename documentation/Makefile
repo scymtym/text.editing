@@ -11,13 +11,13 @@ GENERATED = generated-version.texi                           \
             generated-builtin-units.texi
 # generated-chapter-changelog.texi
 
+INPUTS = $(SOURCES) $(GENERATED)
+
 FIGURES = $(wildcard *.png)
 
 .PHONY: all clean
 
 all : $(NAME).info $(NAME).pdf $(NAME).html
-
-INPUTS = $(SOURCES) $(GENERATED)
 
 generated-version.texi: ../version-string.sexp
 	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit                        \
