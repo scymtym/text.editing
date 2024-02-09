@@ -60,7 +60,7 @@ that)
 Input handling or a command processor (This aspect obviously heavily
 depends on the application and there are many ways to do it.
 @uref{https://codeberg.org/McCLIM/McCLIM, McCLIM} is one library
-provides both input handling and command processing.)
+which provides both input handling and command processing.)
 
 @item
 Advance parsing (the
