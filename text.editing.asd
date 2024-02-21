@@ -9,7 +9,7 @@
   :license     "LGPLv3"
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de>"
 
-  :version     (:read-file-form "version-string.sexp")
+  :version     (:read-file-form "data/version-string.sexp")
   :depends-on  ("alexandria"
                 "utilities.print-items"
 
@@ -60,7 +60,7 @@
   :license     "LGPLv3"
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de"
 
-  :version     (:read-file-form "version-string.sexp")
+  :version     (:read-file-form "data/version-string.sexp")
   :depends-on  ("fiveam"
 
                 (:version "text.editing" (:read-file-form "version-string.sexp")))

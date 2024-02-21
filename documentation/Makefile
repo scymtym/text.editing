@@ -19,7 +19,7 @@ FIGURES = $(wildcard *.png)
 
 all : $(NAME).info $(NAME).pdf $(NAME).html
 
-generated-version.texi: ../version-string.sexp
+generated-version.texi: ../data/version-string.sexp
 	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit                        \
 	     --eval '(require :asdf)'                                                           \
 	     --eval '(format t "@macro sysversion~%~A~%@end macro" (uiop:read-file-form "$<"))' \
