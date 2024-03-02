@@ -21,8 +21,9 @@
 
 ;;; TODO repeated in incrementalist
 (defun other-punctuation-p (character)
-  (member character '(#\- #\/
-                      #\( #\) #\[ #\] #\< #\> #\{ #\} #\")))
+  (member character '(#\- #\+ #\* #\/ #\% #\^ #\= #\_ #\~
+                      #\` #\' #\" #\|
+                      #\( #\) #\[ #\] #\< #\> #\{ #\})))
 
 (defun punctuationp (character)
   (or (sentence-punctuation-p character)
