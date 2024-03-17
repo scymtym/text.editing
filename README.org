@@ -42,7 +42,7 @@
 
   + Input handling or a command processor
 
-  + Advanced parsing (see [[https://github.com/robert-strandh/incrementalist][incrementalist]] for that)
+  + Advanced parsing (see [[https://github.com/s-expressionists/incrementalist][incrementalist]] for that)
 
   + Syntax highlighting (see TODO for that)
 
