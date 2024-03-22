@@ -294,8 +294,10 @@ classes provided by Cluffer.
 @node Primary Site Protocol
 @subsection Primary Site Protocol
 
+@cindex primary site
+
 @defgena{site,text.editing} buffer
-Return the primary site of @var{buffer}.
+Return the @ref{term-primary-site,primary site} of @var{buffer}.
 @end deffn
 
 The generic functions @ref{Generic-Function text.editing|point,point}
@@ -458,7 +460,8 @@ This function generally returns the values returned by the
 condition that may be signaled by the @var{operation} call.  However, if
 @var{target} is a buffer and multiple sites exist, a different
 convention may be used in order to return one result for each site or
-bundle conditions for multiple sites in a single condition.
+bundle conditions for multiple sites in a single condition
+(@pxref{Multiple Sites Protocol}).
 @end deffn
 
 @node Movement and Editing Protocol

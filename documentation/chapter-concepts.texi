@@ -127,8 +127,11 @@ point, mark, insertion stack, etc.) which would generally act as if it
 were the only cursor in the buffer (disregarding effects that arise from
 sites being too close together or overlapping).
 
-Each buffer has exactly one @dfn{primary} site and zero or more
-@dfn{secondary} sites.  Secondary sites are added and removed by
+@cindex primary site
+@cindex secondary site
+Each buffer has exactly one @anchor{term-primary-site} @dfn{primary}
+site and zero or more @anchor{term-secondary-site}@dfn{secondary} sites.
+Secondary sites are added and removed by
 @ref{Generic-Function text.editing|add-site,certain operations}.  A
 secondary site and the primary site can
 @ref{Generic-Function text.editing|rotate-sites,switch roles} since the
