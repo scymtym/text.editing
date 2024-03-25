@@ -498,6 +498,11 @@ that protocol
 Move @var{cursor} to the beginning or end of the sub-sequence of buffer
 items indicated by @var{unit}.
 
+@var{cursor} is an attached Cluffer cursor.
+
+@var{unit} is a unit of movement such as @ref{unit-item,item} or
+@ref{unit-word,word}.
+
 If @var{direction} is @t{:forward}, @var{cursor} moves to the end of the
 sub-sequence. If @var{direction} is @t{:backward}, @var{cursor} moves to
 the beginning of the sub-sequence.
@@ -535,8 +540,8 @@ Delete the sub-sequence of buffer items indicated by @var{cursor},
 
 @var{cursor} is an attached Cluffer cursor.
 
-@var{unit} is a unit of movement such as @ref{unit-item,item},
-@ref{unit-word,word} or @t{expression}.
+@var{unit} is a unit of movement such as @ref{unit-item,item}
+or @ref{unit-word,word}.
 
 @var{direction} is either @t{:forward} or @t{:backward}.
 @end deffn

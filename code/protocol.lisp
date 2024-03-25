@@ -292,7 +292,7 @@ sites in a single condition."))
 
 CURSOR is an attached Cluffer cursor that should be moved.
 
-UNIT is a unit of movement such as `:item', `:word', `:expression'.
+UNIT is a unit of movement such as `item' or `word'.
 
 DIRECTION is either `:forward' or `:backward'."))
 
@@ -320,7 +320,7 @@ START and END, when supplied, select a sub-sequence of ITEMS."))
 
 CURSOR is an attached Cluffer cursor.
 
-UNIT is a unit of movement such as `item', `word', `expression'.
+UNIT is a unit of movement such as `item' or `word'.
 
 DIRECTION is either `:forward' or `:backward'."))
 
