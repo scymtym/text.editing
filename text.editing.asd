@@ -60,10 +60,13 @@
   :license     "LGPLv3"
   :author      "Jan Moringen <jmoringe@techfak.uni-bielefeld.de"
 
-  :version     (:read-file-form "data/version-string.sexp")
+  :version     (:read-file-form #1="data/version-string.sexp")
   :depends-on  ("fiveam"
 
-                (:version "text.editing" (:read-file-form "version-string.sexp")))
+                "concrete-syntax-tree"
+                "eclector-concrete-syntax-tree" ; for expression module tests
+
+                (:version "text.editing" (:read-file-form #1#)))
 
   :components  ((:module     "test"
                  :serial     t
