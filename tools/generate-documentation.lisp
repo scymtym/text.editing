@@ -20,6 +20,7 @@
           :do (case character
                 (#\{ (write-string "@{" stream))
                 (#\} (write-string "@}" stream))
+                (#\@ (write-string "@@" stream))
                 (t   (write-char character stream))))))
 
 ;;; Unit descriptions and unit graph

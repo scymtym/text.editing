@@ -68,6 +68,22 @@
    "delete-indentation")
   (delete-trailing-whitespace ()
    "delete-trailing-whitespace"))
+ ("Marking"
+  (mark-object (unit direction)
+   (buffer
+    (:forward  ("mark-whole-buffer" :key "C-x h")))
+   (semi-buffer
+    (:forward  ("mark-end-of-buffer"))
+    (:backward ("mark-beginning-of-buffer")))
+   (word
+    (:forward ("mark-word" :key "M-@")))
+   (sentence
+    (:forward  ("mark-end-of-sentence"))
+    (:backward ("mark-beginning-of-sentence")))
+   (paragraph
+    (:forward ("mark-paragraph" :key "M-h")))
+   (page
+    (:forward ("mark-page" :key "C-x C-p")))))
  ("Transformation"
   (change-case (unit direction case)
    (:region
