@@ -298,31 +298,34 @@
              (ecase target
                (:point  (apply operation (e:point buffer) arguments))
                (:buffer (apply #'e:perform buffer operation arguments)))))
-      (case expected
-        (cluffer:beginning-of-buffer
-         (signals cluffer:beginning-of-buffer (do-it)))
-        (cluffer:end-of-buffer
-         (signals cluffer:end-of-buffer (do-it)))
-        (e:mark-not-set-error
-         (signals e:mark-not-set-error (do-it)))
-        (e:mark-not-active-error
-         (signals e:mark-not-active-error (do-it)))
-        (e:insertion-stack-empty-error
-         (signals e:insertion-stack-empty-error (do-it)))
-        (t
-         (let ((value (do-it)))
-           (destructuring-bind
-               (&key ((:state expected-state) initial-state)
-                     ((:value expected-value) nil expected-value-supplied-p))
-               (if (typep expected '(cons keyword))
-                   expected
-                   (list :state expected))
-             (when expected-value-supplied-p
-               (is (equalp expected-value value)))
-             (unless (null expected-state)
-               (is-buffer-state*
-                expected-state buffer
-                (a:ensure-car initial-state) operation arguments)))))))))
+      (if (and (symbolp expected)
+               (find-class expected nil))
+          ;; Like `5am:signals' but 1) the expected condition is not
+          ;; static 2) custom reason message
+          (block nil
+            (handler-bind
+                ((condition (lambda (condition)
+                              (when (typep condition expected)
+                                (return)))))
+              (do-it))
+            (5am:fail "~@<~/text.editing.test::format-case/ a condition ~
+                       of type ~A to be signaled but no condition was ~
+                       signaled.~@:>"
+                (list (a:ensure-car initial-state) operation arguments)
+                expected))
+          (let ((value (do-it)))
+            (destructuring-bind
+                (&key ((:state expected-state) initial-state)
+                      ((:value expected-value) nil expected-value-supplied-p))
+                (if (typep expected '(cons keyword))
+                    expected
+                    (list :state expected))
+              (when expected-value-supplied-p
+                (is (equalp expected-value value)))
+              (unless (null expected-state)
+                (is-buffer-state*
+                 expected-state buffer
+                 (a:ensure-car initial-state) operation arguments))))))))
 
 (defun map-argument-combinations (function arguments)
   (if (null arguments)
@@ -353,7 +356,9 @@ must be either `:point' or `:buffer'.
 Each clause in CLAUSES is of the form
 
   ((ARGUMENT-DESIGNATOR₁ … ARGUMENT-DESIGNATORₙ)
-   INITIAL-STATE-DESIGNATOR EXPECTED-DESIGNATOR₁ … EXPECTED-DESIGNATORₘ)
+   (INITIAL-STATE-DESIGNATOR₁ EXPECTED-DESIGNATOR₁₁ … EXPECTED-DESIGNATOR₁ₘ)
+   (INITIAL-STATE-DESIGNATOR₂ EXPECTED-DESIGNATOR₂₁ … EXPECTED-DESIGNATOR₂ₘ)
+   …)
 
 where ARGUMENT-DESIGNATORₖ evaluates to either an atom or a list of
 objects. OPERATION is (repeatedly) performed on a fresh buffer that is
@@ -380,7 +385,7 @@ operation must not modify the buffer state. Example:
 
   (operation-cases (e:delete :target :buffer)
     ((e:region (:forward :backward))
-     \"↑bar↧baz\" \"foo↑↧baz\" 'c:beginning-of-buffer))
+     (\"↑bar↧baz\" \"foo↑↧baz\" 'c:beginning-of-buffer)))
 
 ."
   (flet ((expand-clause (clause)

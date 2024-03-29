@@ -19,7 +19,8 @@
    #:in-suite
    #:test
    #:is
-   #:signals)
+   #:signals
+   #:fail)
 
   ;; Test utilities
   (:export
