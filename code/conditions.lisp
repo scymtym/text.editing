@@ -9,15 +9,28 @@
 (define-condition editing-condition (condition)
   ())
 
+(define-condition cursor-condition (editing-condition)
+  ((%cursor :initarg :cursor
+            :reader  cursor))
+  (:default-initargs
+   :cursor (a:required-argument :cursor)))
+
 (define-condition site-condition (editing-condition)
   ((%site :initarg :site
-          :reader  site))
+          :reader  site)))
+
+(define-condition maybe-site-condition (site-condition)
+  ((%site :writer   (setf %site)
+          :initform nil)))
+
+(define-condition required-site-condition (site-condition)
+  ()
   (:default-initargs
    :site (a:required-argument :site)))
 
 ;;; Mark
 
-(define-condition mark-not-set-error (site-condition
+(define-condition mark-not-set-error (required-site-condition
                                       error)
   ()
   (:report
@@ -25,7 +38,7 @@
      (format stream "~@<The mark is not set in ~A.~@:>"
              (site condition)))))
 
-(define-condition mark-not-active-error (site-condition
+(define-condition mark-not-active-error (required-site-condition
                                          error)
   ((%mark :initarg :mark
           :reader  %mark))
@@ -36,7 +49,7 @@
      (format stream "~@<The mark ~A is not active in ~A.~@:>"
              (%mark condition) (site condition)))))
 
-(define-condition mark-stack-empty-error (site-condition
+(define-condition mark-stack-empty-error (required-site-condition
                                           error)
   ()
   (:report
@@ -46,7 +59,7 @@
 
 ;;; Insertion stack
 
-(define-condition insertion-stack-empty-error (site-condition
+(define-condition insertion-stack-empty-error (maybe-site-condition
                                                error)
   ()
   (:report

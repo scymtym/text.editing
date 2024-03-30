@@ -26,8 +26,14 @@
   (:export
    #:editing-condition
 
+   #:cursor-condition
+   #:cursor
+
    #:site-condition
    #:site
+
+   #:maybe-site-condition
+   #:required-site-condition
 
    #:mark-not-set-error
 

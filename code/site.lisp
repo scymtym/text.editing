@@ -113,3 +113,12 @@
   (c:detach-cursor (point object))
   (a:when-let ((mark (mark object)))
     (c:detach-cursor mark)))
+
+(defmethod perform :around ((target site) (operation t) &rest args)
+  (declare (ignore args))
+  ;; For signaled conditions of type `maybe-site-condition', set the
+  ;; site slot if it is not already set.
+  (handler-bind ((maybe-site-condition (lambda (condition)
+                                         (when (null (site condition))
+                                           (setf (%site condition) target)))))
+    (call-next-method)))

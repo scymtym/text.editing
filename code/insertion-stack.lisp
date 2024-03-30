@@ -66,4 +66,4 @@
   (let ((entries (entries insertion-stack)))
     (if (plusp (length entries))
         (vector-pop entries)
-        (error 'insertion-stack-empty-error :site nil)))) ; TODO get the site somehow?
+        (error 'insertion-stack-empty-error))))
