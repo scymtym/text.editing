@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="104.98959mm"
+   height="94.671333mm"
+   viewBox="0 0 104.98959 94.671333"
    version="1.1"
    id="svg5"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
@@ -27,28 +27,28 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.7891676"
-     inkscape:cx="348.20662"
-     inkscape:cy="259.61794"
+     inkscape:zoom="0.63256627"
+     inkscape:cx="223.69198"
+     inkscape:cy="147.02017"
      inkscape:window-width="1920"
-     inkscape:window-height="1131"
+     inkscape:window-height="1149"
      inkscape:window-x="1920"
-     inkscape:window-y="32"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      showguides="true">
     <sodipodi:guide
-       position="75.805415,259.0973"
+       position="65.50742,68.155292"
        orientation="1,0"
        id="guide3008"
        inkscape:locked="false" />
     <sodipodi:guide
-       position="32.20677,259.1466"
+       position="21.908777,68.204592"
        orientation="0,-1"
        id="guide621"
        inkscape:locked="false" />
     <sodipodi:guide
-       position="31.551045,230.81336"
+       position="21.253052,39.871353"
        orientation="0,-1"
        id="guide627"
        inkscape:locked="false" />
@@ -78,7 +78,8 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-10.297992,-11.386662)">
     <rect
        style="fill:#eeeeec;fill-opacity:1;stroke:#888a85;stroke-width:0.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect2888"
@@ -667,7 +668,7 @@
          y="36.761425"
          id="text2910"><tspan
            sodipodi:role="line"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264583px;fill:#888a85"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#888a85;stroke-width:0.264583px"
            x="17.478075"
            y="36.761425"
            id="tspan2908">Point</tspan></text>

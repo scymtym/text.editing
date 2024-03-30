@@ -10,7 +10,7 @@ This section defines a few concepts that are important for the
 following figure illustrates some of the concepts and their relations:
 
 @float Figure,fig:architecture
-@center @image{architecture,15cm}
+@center @image{architecture,10cm}
 @caption{Examples of important concepts and their relations for a single
 buffer.}
 @end float

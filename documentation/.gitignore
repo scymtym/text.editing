@@ -9,6 +9,7 @@
 *.html
 *.info
 *.pdf
+*.png
 
 generated-version.texi
 generated-chapter-equivalent-emacs-commands.texi

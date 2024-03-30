@@ -13,11 +13,19 @@ GENERATED = generated-version.texi                           \
 
 INPUTS = $(SOURCES) $(GENERATED)
 
-FIGURES = $(wildcard *.png)
+FIGURES = $(wildcard *.svg)
+PDFS    = $(subst .svg,.pdf,$(FIGURES))
+IMAGES  = $(subst .svg,.png,$(FIGURES))
 
 .PHONY: all clean
 
 all : $(NAME).info $(NAME).pdf $(NAME).html
+
+%.pdf: %.svg
+	rsvg-convert --format=pdf $< > $@
+
+%.png: %.svg
+	rsvg-convert --format=png $< > $@
 
 generated-version.texi: ../data/version-string.sexp
 	$(SBCL) --noinform --disable-debugger --no-sysinit --no-userinit                        \
@@ -40,13 +48,13 @@ generated-builtin-units.texi generated-chapter-equivalent-emacs-commands.texi: \
 #generated-chapter-changelog.texi: ../changes.sexp ../tools/write-changelog.lisp
 #	$(SBCL) --script write-changelog.lisp > $@
 
-$(NAME).info: $(INPUTS) $(FIGURES)
+$(NAME).info: $(INPUTS) $(IMAGES)
 	makeinfo --output $@ $(NAME).texi
 
-$(NAME).pdf: $(INPUTS) $(FIGURES)
+$(NAME).pdf: $(INPUTS) $(PDFS)
 	texi2pdf $(NAME).texi
 
-$(NAME).html: $(INPUTS) $(FIGURES) $(wildcard *.css)
+$(NAME).html: $(INPUTS) $(IMAGES) $(wildcard *.css)
 	makeinfo --html --no-split --no-headers                                 \
 	         --css-include=style-common.css --css-include=style-single.css  \
 	         $(NAME).texi
