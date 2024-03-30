@@ -190,13 +190,16 @@
                  start-cursor end-cursor))
 
 (defun apply-at-cursor-until (continuation cursor cursor-predicate
-                              item-predicate item-key) ; TODO item-key, item-predicate optional
+                              &optional item-predicate item-key)
   (loop :with cursor-predicate = (a:ensure-function cursor-predicate)
         :with item-predicate = (when item-predicate
                                  (a:ensure-function item-predicate))
         :until (funcall cursor-predicate cursor)
-        :do (let ((item (funcall item-key cursor)))
-              (when (and item-predicate (funcall item-predicate item))
+        :do (let ((item (if (null item-key)
+                            nil
+                            (funcall item-key cursor))))
+              (when (and (not (null item-predicate))
+                         (funcall item-predicate item))
                 (loop-finish))
               (funcall continuation cursor item))))
 

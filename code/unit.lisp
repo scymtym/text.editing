@@ -182,17 +182,17 @@ The beginning and end of the buffer also delimit paragraphs."))
 
 ;;; Item
 
-(defmethod apply-from-cursor (continuation
-                              (cursor    c:cursor)
-                              (unit      item)
-                              (direction (eql :forward)))
+(defmethod apply-from-cursor ((continuation t)
+                              (cursor       c:cursor)
+                              (unit         item)
+                              (direction    (eql :forward)))
   (let ((item (item-after-cursor* cursor)))
     (funcall continuation cursor item)))
 
-(defmethod apply-from-cursor (continuation
-                              (cursor    c:cursor)
-                              (unit      item)
-                              (direction (eql :backward)))
+(defmethod apply-from-cursor ((continuation t)
+                              (cursor       c:cursor)
+                              (unit         item)
+                              (direction    (eql :backward)))
   (let ((item (item-before-cursor* cursor)))
     (funcall continuation cursor item)))
 
@@ -203,16 +203,18 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (unit         semi-line)
                               (direction    (eql :forward)))
   (apply-at-cursor-until
-   continuation cursor (a:disjoin #'c:end-of-buffer-p #'c:end-of-line-p)
-   (constantly nil) #'item-after-cursor*))
+   continuation cursor
+   (a:disjoin #'c:end-of-buffer-p #'c:end-of-line-p)
+   nil #'item-after-cursor*))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
                               (unit         semi-line)
                               (direction    (eql :backward)))
   (apply-at-cursor-until
-   continuation cursor (a:disjoin #'c:beginning-of-buffer-p #'c:beginning-of-line-p)
-   (constantly nil) #'item-before-cursor*))
+   continuation cursor
+   (a:disjoin #'c:beginning-of-buffer-p #'c:beginning-of-line-p)
+   nil #'item-before-cursor*))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
@@ -281,8 +283,8 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (direction    (eql :forward)))
   (loop :while (end-of-sentence-p cursor)
         :do (move-item-forward cursor))
-  (apply-at-cursor-until continuation cursor #'end-of-sentence-p
-                         (constantly nil) #'item-after-cursor*))
+  (apply-at-cursor-until
+   continuation cursor #'end-of-sentence-p nil #'item-after-cursor*))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
@@ -290,8 +292,8 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (direction    (eql :backward)))
   (loop :while (beginning-of-sentence-p cursor)
         :do (move-item-backward cursor))
-  (apply-at-cursor-until continuation cursor #'beginning-of-sentence-p
-                         (constantly nil) #'item-before-cursor*))
+  (apply-at-cursor-until
+   continuation cursor #'beginning-of-sentence-p nil #'item-before-cursor*))
 
 ;;; Paragraph
 
@@ -310,11 +312,12 @@ The beginning and end of the buffer also delimit paragraphs."))
         ;; longer at the end of a paragraph.
         (loop :while (end-of-paragraph-p cursor)
               :do (move-item-forward cursor)))
-    (apply-at-cursor-until continuation cursor (lambda (cursor)
-                                                 (if force-one?
-                                                     (setf force-one? nil)
-                                                     (end-of-paragraph-p cursor)))
-                           (constantly nil) #'item-after-cursor*)))
+    (apply-at-cursor-until
+     continuation cursor (lambda (cursor)
+                           (if force-one?
+                               (setf force-one? nil)
+                               (end-of-paragraph-p cursor)))
+     nil #'item-after-cursor*)))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
@@ -322,8 +325,8 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (direction    (eql :backward)))
   (loop :while (beginning-of-paragraph-p cursor)
         :do (move-item-backward cursor))
-  (apply-at-cursor-until continuation cursor #'beginning-of-paragraph-p
-                         (constantly nil) #'item-before-cursor*))
+  (apply-at-cursor-until
+   continuation cursor #'beginning-of-paragraph-p nil #'item-before-cursor*))
 
 ;;; Buffer
 
@@ -331,15 +334,15 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (cursor       c:cursor)
                               (unit         semi-buffer)
                               (direction    (eql :forward)))
-  (apply-at-cursor-until continuation cursor #'c:end-of-buffer-p
-                         (constantly nil) #'item-after-cursor*))
+  (apply-at-cursor-until
+   continuation cursor #'c:end-of-buffer-p nil #'item-after-cursor*))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
                               (unit         semi-buffer)
                               (direction    (eql :backward)))
-  (apply-at-cursor-until continuation cursor #'c:beginning-of-buffer-p
-                         (constantly nil) #'item-before-cursor*))
+  (apply-at-cursor-until
+   continuation cursor #'c:beginning-of-buffer-p nil #'item-before-cursor*))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
