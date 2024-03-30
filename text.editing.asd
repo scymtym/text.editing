@@ -51,7 +51,18 @@
                               (:file "conditions")
                               (:file "state")
                               (:file "buffer-mixin")
-                              (:file "operations"))))
+                              (:file "operations")))
+
+                (:module      "expression"
+                 :pathname    "code/expression"
+                 :depends-on  ("code")
+                 :serial      t
+                 :components  ((:file "package")
+                               (:file "protocol")
+                               (:file "conditions")
+                               (:file "utilities")
+                               (:file "unit")
+                               (:file "operations"))))
 
   :in-order-to ((test-op (test-op "text.editing/test"))))
 
@@ -85,6 +96,14 @@
 
                 (:module     "search"
                  :pathname   "test/search"
+                 :depends-on ("test") ; for test utilities
+                 :serial     t
+                 :components ((:file "package")
+                              (:file "utilities")
+                              (:file "operations")))
+
+                (:module     "expression"
+                 :pathname "test/expression"
                  :depends-on ("test") ; for test utilities
                  :serial     t
                  :components ((:file "package")
