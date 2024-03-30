@@ -292,8 +292,8 @@
 ;;; Operation tests
 
 (defun operation-case (operation arguments expected initial-state
-                       &key target)
-  (with-buffer (buffer initial-state)
+                       &key target (buffer-class 'test-buffer))
+  (with-buffer (buffer initial-state :buffer-class buffer-class)
     (flet ((do-it ()
              (ecase target
                (:point  (apply operation (e:point buffer) arguments))
@@ -347,7 +347,9 @@
       (t
        (values first-expected rest-expected)))))
 
-(defmacro operation-cases ((operation &key (target :point)) &rest clauses)
+(defmacro operation-cases ((operation &key (buffer-class ''test-buffer)
+                                           (target       :point))
+                           &rest clauses)
   "Perform OPERATION (not evaluated) for test cases specified by CLAUSES.
 
 TARGET (evaluated) controls on which level OPERATION is performed and
@@ -399,7 +401,8 @@ operation must not modify the buffer state. Example:
                                    (extract-expected all-expected))
                              `(operation-case ',operation (list ,@arguments)
                                               ,expected ,input
-                                              :target ,target)))
+                                              :target       ,target
+                                              :buffer-class ,buffer-class)))
                          arguments))))
                (a:mappend #'expand-sub-clause sub-clauses)))))
     `(progn ,@(a:mappend #'expand-clause clauses))))
