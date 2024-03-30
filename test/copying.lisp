@@ -28,7 +28,11 @@
     ("hel↑lo world.¶line 2" '("hel↑lo world.¶line 2" :killed "l")))
    ((e:line (:forward ; :backward
              ))
-    ("hel↑lo world.¶line 2" '("hel↑lo world.¶line 2" :killed "hello world.")))
+    ("hel↑lo world.¶line 2" `("hel↑lo world.¶line 2"
+                              :killed ,(format nil "hello world.~%"))))
+   ((e:semi-line (:forward ; :backward
+             ))
+    ("hel↑lo world.¶line 2" '("hel↑lo world.¶line 2" :killed "lo world.")))
    ((e:buffer (:forward ; :backward
              ))
     ("hel↑lo world.¶line 2" '("hel↑lo world.¶line 2" :killed "hello world.¶line 2")))
@@ -55,7 +59,8 @@
     ("hel↑lo world.¶line 2" '("hel↑o world.¶line 2" :killed "l")
                             '("he↑lo world.¶line 2" :killed "l")))
    ((e:line (:forward :backward))
-    ("↑hello world.¶line 2" (:always '("↑¶line 2" :killed "hello world."))))
+    ("↑hello world.¶line 2" `("↑line 2"  :killed ,(format nil "hello world.~%"))
+                            '("↑¶line 2" :killed "hello world.")))
    ((e:semi-line (:forward :backward))
     ("hello↑ world.¶line 2" '("hello↑¶line 2"   :killed " world.")
                             '("↑ world.¶line 2" :killed "hello")))

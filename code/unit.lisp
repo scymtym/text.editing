@@ -202,19 +202,23 @@ The beginning and end of the buffer also delimit paragraphs."))
                               (cursor       c:cursor)
                               (unit         semi-line)
                               (direction    (eql :forward)))
-  (apply-at-cursor-until
-   continuation cursor
-   (a:disjoin #'c:end-of-buffer-p #'c:end-of-line-p)
-   nil #'item-after-cursor*))
+  (flet ((donep (cursor)
+           (or (c:end-of-buffer-p cursor)
+               (c:end-of-line-p cursor))))
+    (declare (dynamic-extent #'donep))
+    (apply-at-cursor-until
+     continuation cursor #'donep nil #'item-after-cursor*)))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
                               (unit         semi-line)
                               (direction    (eql :backward)))
-  (apply-at-cursor-until
-   continuation cursor
-   (a:disjoin #'c:beginning-of-buffer-p #'c:beginning-of-line-p)
-   nil #'item-before-cursor*))
+  (flet ((donep (cursor)
+           (or (c:beginning-of-buffer-p cursor)
+               (c:beginning-of-line-p cursor))))
+    (declare (dynamic-extent #'donep))
+    (apply-at-cursor-until
+     continuation cursor #'donep nil #'item-before-cursor*)))
 
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
@@ -231,13 +235,40 @@ The beginning and end of the buffer also delimit paragraphs."))
 (defmethod apply-from-cursor ((continuation t)
                               (cursor       c:cursor)
                               (unit         line)
-                              (direction    t))
+                              (direction    (eql :forward)))
   ;; What this does in most cases is moving the to the start/end of
   ;; the line then process all items contained in the line towards and
   ;; up to the opposite end of the line.
-  (let ((opposite (opposite-direction direction)))
-    (apply-from-cursor continuation cursor line-boundary opposite)
-    (apply-from-cursor continuation cursor semi-line direction)))
+  (apply-from-cursor continuation cursor line-boundary :backward)
+  (let ((end-of-line-seen-p nil))
+    (flet ((donep (cursor)
+             (or end-of-line-seen-p
+                 (c:end-of-buffer-p cursor)
+                 (when (c:end-of-line-p cursor)
+                   (setf end-of-line-seen-p t)
+                   nil))))
+      (declare (dynamic-extent #'donep))
+      (apply-at-cursor-until
+       continuation cursor #'donep nil #'item-after-cursor*))))
+
+(defmethod apply-from-cursor ((continuation t)
+                              (cursor       c:cursor)
+                              (unit         line)
+                              (direction    (eql :backward)))
+  ;; What this does in most cases is moving the to the start/end of
+  ;; the line then process all items contained in the line towards and
+  ;; up to the opposite end of the line.
+  (apply-from-cursor continuation cursor line-boundary :forward)
+  (let ((beginning-of-line-seen-p nil))
+    (flet ((donep (cursor)
+             (or beginning-of-line-seen-p
+                 (c:beginning-of-buffer-p cursor)
+                 (when (c:beginning-of-line-p cursor)
+                   (setf beginning-of-line-seen-p t)
+                   nil))))
+      (declare (dynamic-extent #'donep))
+      (apply-at-cursor-until
+       continuation cursor #'donep nil #'item-before-cursor*))))
 
 ;;; Prose units
 

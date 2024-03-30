@@ -26,18 +26,18 @@
      ("Hello world.¶line 2↑" 'c:end-of-buffer       'c:end-of-buffer       'c:end-of-buffer
                              "Hello world.¶line ↑2" "Hello world.¶line ↑2" "Hello world.¶line ↑2"))
     ((e:line (:forward :backward) (:up :down :capital))
-     ("↑Hello world.¶line 2" "HELLO WORLD.↑¶line 2" "hello world.↑¶line 2" "Hello World.↑¶line 2"
+     ("↑Hello world.¶line 2" "HELLO WORLD.¶↑line 2" "hello world.¶↑line 2" "Hello World.¶↑line 2"
                              "↑HELLO WORLD.¶line 2" "↑hello world.¶line 2" "↑hellO worlD.¶line 2")
-     ("Hel↑lo world.¶line 2" "HELLO WORLD.↑¶line 2" "hello world.↑¶line 2" "Hello World.↑¶line 2"
+     ("Hel↑lo world.¶line 2" "HELLO WORLD.¶↑line 2" "hello world.¶↑line 2" "Hello World.¶↑line 2"
                              "↑HELLO WORLD.¶line 2" "↑hello world.¶line 2" "↑hellO worlD.¶line 2")
-     ("Hello↑ world.¶line 2" "HELLO WORLD.↑¶line 2" "hello world.↑¶line 2" "Hello World.↑¶line 2"
+     ("Hello↑ world.¶line 2" "HELLO WORLD.¶↑line 2" "hello world.¶↑line 2" "Hello World.¶↑line 2"
                              "↑HELLO WORLD.¶line 2" "↑hello world.¶line 2" "↑hellO worlD.¶line 2")
-     ("Hello world.↑¶line 2" "HELLO WORLD.↑¶line 2" "hello world.↑¶line 2" "Hello World.↑¶line 2"
+     ("Hello world.↑¶line 2" "HELLO WORLD.¶↑line 2" "hello world.¶↑line 2" "Hello World.¶↑line 2"
                              "↑HELLO WORLD.¶line 2" "↑hello world.¶line 2" "↑hellO worlD.¶line 2")
      ("Hello world.¶↑line 2" "Hello world.¶LINE 2↑" "Hello world.¶line 2↑" "Hello world.¶Line 2↑"
-                             "Hello world.¶↑LINE 2" "Hello world.¶↑line 2" "Hello world.¶↑linE 2")
+                             "Hello world.↑¶LINE 2" "Hello world.↑¶line 2" "Hello world.↑¶linE 2")
      ("Hello world.¶line 2↑" "Hello world.¶LINE 2↑" "Hello world.¶line 2↑" "Hello world.¶Line 2↑"
-                             "Hello world.¶↑LINE 2" "Hello world.¶↑line 2" "Hello world.¶↑linE 2"))
+                             "Hello world.↑¶LINE 2" "Hello world.↑¶line 2" "Hello world.↑¶linE 2"))
     ((e:semi-line (:forward :backward) (:up :down :capital))
      . #1=(("↑Hello world.¶line 2" "HELLO WORLD.↑¶line 2" "hello world.↑¶line 2" "Hello World.↑¶line 2"
                                    "↑Hello world.¶line 2" "↑Hello world.¶line 2" "↑Hello world.¶line 2")
