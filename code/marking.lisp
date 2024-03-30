@@ -71,7 +71,28 @@
           ((not (mark-active-p site))
            (move-cursor-to-line mark (c:line point) (c:cursor-position point))
            (setf (mark-active-p site) t)))
-    (move mark unit direction)))
+    (let ((mover  (ecase direction
+                    (:forward  #'move-item-forward)
+                    (:backward #'move-item-backward)))
+          (firstp t))
+      (apply-from-cursor
+       (lambda (cursor item)
+         (declare (ignore item))
+         ;; For some values of UNIT such as `expression' or
+         ;; `toplevel-expression', in addition to MARK, point should
+         ;; also move since the desired region extends in the
+         ;; "opposite" direction starting from POINT.  If the sequence
+         ;; swept over by CURSOR extends in the opposite direction
+         ;; like that, move POINT to the first such location.
+         (when firstp
+           (when (ecase direction
+                   (:forward  (c:cursor< cursor point))
+                   (:backward (c:cursor< point cursor)))
+             (move-cursor-to-line
+              point (c:line cursor) (c:cursor-position cursor)))
+           (setf firstp nil))
+         (funcall mover cursor))
+       mark unit direction))))
 (operates-on-site mark-object)
 
 ;;; Applying operations to the `region' unit
