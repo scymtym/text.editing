@@ -1,0 +1,379 @@
+@node Expressions
+@chapter Expressions
+
+@menu
+* Expressions Concepts::
+* Expressions Dictionary::
+@end menu
+
+@node Expressions Concepts
+@section Expressions Concepts
+
+@cindex expression
+This module adds support for operating on
+@anchor{term-expression}@dfn{expressions} which are basically nodes in a
+(concrete) syntax tree constructed @emph{by clients of this library}
+from the text of the buffer.  To this end, the module defines two
+@ref{term-unit,units}: @ref{unit-expression,expression} and
+@ref{unit-toplevel-expression,toplevel-expression}, the semantics of
+which depend on the implementations of @ref{Expression Node Protocol,two}
+@ref{Expression Tree Protocol,protocols} that clients of
+this library must provide, for example by parsing the source code of a
+buffer and constructing a (concrete) syntax tree.  The expression-based
+units work with the usual operations for @ref{Motion Operations,motion},
+@ref{Deletion Operations, deletion} and so on.  In addition, this module
+provides @ref{Expression Operations,specialized operations} such as
+splitting and joining that work with the expression-based units.
+
+The concept of an expression must appear very vague at this point and
+this vagueness is in part intrinsic since the exact nature of
+expressions for a given buffer is defined, as mentioned above, by the
+client.  However, we can still make the concept as concrete as possible
+by defining that an expression is a node in a tree and has the following
+properties
+
+@itemize
+
+@item
+A @dfn{start location} which is a buffer location expressed as a line
+number and a column number.
+
+@item
+An @dfn{end location} which is a buffer location that is expressed as a
+line number and a column number and follows the start location.
+
+@item
+A possibly empty sequence of child expressions such that:
+
+@itemize
+
+@item
+For each child expression the start and end locations are within the
+buffer delimited by the start and end location of the parent expression.
+
+@item
+for a child @math{c_2} that follows a child @math{c_1} in the sequence
+of children, the start location of @math{c_2} must be equal to or
+greater than the end location of @math{c_1}.
+
+@end itemize
+
+@end itemize
+
+The following figure shows an example buffer text and a possible
+expression tree for that text:
+@float Figure,fig:expression-tree
+@center @image{expression-tree,7cm}
+@caption{Example buffer text and a possible expression tree for that
+text.  Corresponding parts are indicated by matching colors.  Child
+nodes should be considered from left to right.}
+@end float
+
+@node Expressions Dictionary
+@section Expressions Dictionary
+
+@menu
+* Expression Conditions::
+* Expression Node Protocol::
+* Expression Tree Protocol::
+* Expression Operations::
+@end menu
+
+@node Expression Conditions
+@subsection Expression Conditions
+
+@defclassa{cursor-not-inside-expression-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+which @ref{term-contains,contains} cursor is attempted and no such
+expression exists.
+@end deftp
+
+@defclassa{no-expression-after-cursor-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+after the cursor is attempted and no such expression exists.
+@end deftp
+
+@defclassa{no-expression-before-cursor-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+before the cursor is attempted and no such expression exists.
+@end deftp
+
+@defclassa{expression-at-toplevel-error,@toppackage{}.expression}
+This error is signaled when an operation that requires a non-toplevel
+expression before or after the cursor is attempted and no such
+expression exists.
+@end deftp
+
+@node Expression Node Protocol
+@subsection Expression Node Protocol
+
+The purpose of the expression node protocol is to allow this library to
+inspect nodes of an expression tree that is constructed and managed by a
+client of this library.  Accordingly, this library does not define
+methods on the following generic functions.  Instead, clients are
+expected to define methods that are suitable for the expression
+representation used by the respective client.
+
+@defgena{range,@toppackage{}.expression} expression
+Return the source range, that is the start and end buffer positions, of
+@var{expression} as four values
+@enumerate
+
+@item
+The start line number of @var{expression}
+
+@item
+The start column number of @var{expression}
+
+@item
+The end line number of @var{expression}
+
+@item
+The end column number of @var{expression}
+
+@end enumerate
+@end deffn
+
+@defgena{children,@toppackage{}.expression} expression
+Return a possibly empty sequence of child expressions of
+@var{expression}.  The elements of the returned sequence are ordered
+according to their respective start locations and do not overlap.
+@end deffn
+
+@node Expression Tree Protocol
+@subsection Expression Tree Protocol
+
+The purpose of the expression tree protocol is to allow this library to
+query an expression tree that is constructed and managed by a client of
+this library.  Accordingly, this library does not define all required
+methods on the following generic functions.  Instead, clients are
+expected to define methods (or at least one method) that are suitable
+for the expression tree representation used by the respective client.
+For this protocol, it is sufficient for each client to define a method
+that is suitable for the respective expression tree presentation on the
+generic function @t{map-expressions-containing-cursor-using-buffer}.
+
+For the description of the protocol functions in this section, we need
+the following definition: Let @math{r_s}, the @dfn{start relation}, and
+@math{r_e}, the @dfn{end relation}, be either @math{<} or @math{\le}
+respectively. An expression with start location @math{s} and end
+location @math{e} @anchor{term-contains}@dfn{contains} a cursor with
+respect to @math{r_s} and @math{r_e} iff @math{r_s(s, c) \wedge r_e(c,
+e)}.
+
+@defgena{map-expressions-containing-cursor,@toppackage{}.expression} @
+  function cursor syntax-tree @pkey{} start-relation end-relation
+
+Call @var{function} for each @ref{term-expression,expression} in the
+buffer of @var{cursor} that @ref{term-contains,contains} @var{cursor}
+with respect to @var{start-relation} and @var{end-relation}.  The return
+value of this function is unspecified.  For more information about the
+parameters and behavior,
+@pxref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor-using-buffer,@t{map-expressions-containing-cursor-using-buffer}}.
+
+The default method on this generic function calls
+@ref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor-using-buffer,@t{map-expressions-containing-cursor-using-buffer}}
+with the buffer that @var{cursor} is associated with.
+@end deffn
+
+@defgena{map-expressions-containing-cursor-using-buffer,@toppackage{}.expression} @
+  function buffer cursor syntax-tree @pkey{} start-relation end-relation
+
+Call @var{function} for each @ref{term-expression,expression} in
+@var{buffer} that @ref{term-contains,contains} @var{cursor}
+with respect to @var{start-relation} and @var{end-relation}.  If
+multiple expressions contain @var{cursor}, the call for a given
+expression precedes the calls for the ancestors of that expression in
+the expression tree, that is innermost or leaf expressions are processed
+first, outermost or toplevel expressions are processed last.
+
+@var{syntax-tree} selects the syntax tree in which expressions should be
+considered.  For example, the buffer of @var{cursor} may have an
+associated concrete syntax tree and also an abstract syntax tree.
+
+Both @var{start-relation} and @var{end-relation} which must be either
+the symbol @t{<} or the symbol @t{<=} select the respective relation.
+
+The return value of this function is unspecified.
+@end deffn
+
+@defgena{expressions-containing-cursor,@toppackage{}.expression} @
+  cursor syntax-tree @pkey{} start-relation end-relation count
+
+Return a possibly empty sequence of @ref{term-expression,expressions} in
+the buffer of @var{cursor} that @ref{term-contains,contain} @var{cursor}
+with respect to @var{start-relation} and @var{end-relation}.  If
+@var{count} is supplied, its value must be a non-negative integer.  In
+that case, the number of elements in the returned sequence is limited to
+that number.  For more information about the behavior and the other
+parameters,
+@pxref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor-using-buffer,@t{map-expressions-containing-cursor-using-buffer}}.
+
+The default method on this generic function calls
+@ref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor,@t{map-expressions-containing-cursor}}
+and collects the provided expressions, stopping when @var{count}
+expressions have been collected if applicable.
+@end deffn
+
+@deffuna{innermost-expression-containing-cursor,@toppackage{}.expression} @
+  cursor syntax-tree @pkey{} start-relation end-relation
+
+Return the innermost @ref{term-expression,expression} in the buffer of
+@var{cursor} that @ref{term-contains,contains} @var{cursor} with respect
+to @var{start-relation} and @var{end-relation} or @t{nil} if there is no
+such expression.  For more information about the behavior and the other
+parameters,
+@pxref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor-using-buffer,@t{map-expressions-containing-cursor-using-buffer}}.
+@end deffn
+
+@deffuna{outermost-expression-containing-cursor,@toppackage{}.expresssion} @
+  cursor syntax-tree @pkey{} start-relation end-relation
+
+Return the outermost @ref{term-expression,expression} in the buffer of
+@var{cursor} that @ref{term-contains,contains} @var{cursor} with respect
+to @var{start-relation} and @var{end-relation} or @t{nil} if there is no
+such expression.  For more information about the behavior and the other
+parameters,
+@pxref{Generic-Function @toppackage{}.expression|map-expressions-containing-cursor-using-buffer,@t{map-expressions-containing-cursor-using-buffer}}.
+@end deffn
+
+@node Expression Operations
+@subsection Expression Operations
+
+@defgena{raise,@toppackage{}.expression} cursor unit direction
+
+Raise the innermost @ref{term-expression,expression} @math{e} which
+@ref{term-contains,contains}, follows or precedes @var{cursor} by
+deleting the buffer items that make up the parent of @math{e} and the
+siblings of @math{e} but preserving the buffer items that make up
+@math{e}.
+
+@var{unit} must be @ref{unit-expression,@t{expression}} at the moment.
+
+@var{direction} which must be either @t{:forward} or @t{:backward}
+controls whether the expression @math{e} should follow or precede
+@var{cursor}.
+
+The return value of this function is unspecified.
+
+After the operation, @var{cursor} resides in the same relative location
+with respect to the preserved buffer item as before the operation.
+
+When there is no such expression, signal
+@ref{Class @toppackage{}.expression|no-expression-after-cursor-error,@t{no-expression-after-cursor-error}}
+or
+@ref{Class @toppackage{}.expression|no-expression-before-cursor-error,@t{no-expression-before-cursor-error}},
+depending on @var{direction}.
+
+Examples:
+@example
+@t{(raise cursor @ref{unit-expression,expression} :forward)} in
+  1 2 (3 4 |5 6) 7 8
+@result{} 1 2 |5 7 8
+
+@t{(raise cursor @ref{unit-expression,expression} :backward)} in
+  1 2 (3 4 |5 6) 7 8
+@result{} 1 2 |5 7 8
+@end example
+@end deffn
+
+@defgena{splice,@toppackage{}.expression} cursor unit direction
+
+Splice @ref{term-expression,expressions} @math{e_1} to @math{e_n} that
+follow or precede @var{cursor} by replacing the buffer items that make
+up the expression which @ref{term-contains,contains} @var{cursor} with
+the buffer items that make up @math{e_1} to @math{e_n}.
+
+@var{unit} must be @ref{unit-expression,@t{expression}} at the moment.
+
+If @var{direction} is @t{:forward}, expressions that follow @var{cursor}
+are preserved.  If @var{direction} is @t{:backward}, expressions that
+precede @var{cursor} are preserved.  If @var{direction} is @t{nil},
+expressions that follow @emph{and} precede @var{cursor} are preserved.
+
+The return value of this function is unspecified.
+
+After the operation, @var{cursor} resides in the same relative location
+with respect to the preserved buffer items as before the operation.
+
+When there is no such expression, signal
+@ref{Class @toppackage{}.expression|cursor-not-inside-expression-error,@t{cursor-not-inside-expression-error}}.
+
+Examples:
+@example
+@t{(splice cursor @ref{unit-expression,expression} nil)} in
+  1 2 (3 4 |5 6) 7 8
+@result{} 1 2 3 4 |5 6 7 8
+
+@t{(splice cursor @ref{unit-expression,expression} :forward)} in
+  1 2 (3 4 |5 6) 7 8
+@result{} 1 2 |5 6 7 8
+
+@t{(splice cursor @ref{unit-expression,expression} :backward)} in
+  1 2 (3 4 |5 6) 7 8
+@result{} 1 2 3 4| 7 8
+@end example
+@end deffn
+
+@defgena{split,@toppackage{}.expression} cursor unit
+
+Split the innermost @ref{term-expression,expression} or toplevel
+expression @math{e} that @ref{term-contains,contains} @var{cursor} by
+inserting the a copy of the buffer items that make up the closing
+delimiter of @math{e} before @var{cursor} and a copy of the buffer items
+that make up the opening delimiter of @math{e} after @var{cursor}.
+
+If @var{unit} is @ref{unit-expression,@t{expression}}, @math{e} is the
+innermost expression that contains @var{cursor}.  If @var{unit} is
+@ref{unit-toplevel-expression,@t{toplevel-expression}}, @math{e} is the
+toplevel expression that contains @var{cursor}.  Other values of
+@var{unit} are not supported at the moment.
+
+The return value of this function is unspecified.
+
+After the operation, @var{cursor} resides between the buffer items that
+make up the two new expressions.
+
+When there is no such expression, signal
+@ref{Class @toppackage{}.expression|cursor-not-inside-expression-error,@t{cursor-not-inside-expression-error}}.
+
+Examples:
+@example
+@t{(split cursor @ref{unit-expression,expression})} in
+  (1 (2 |3) 4)
+@result{} (1 (2 )|(3) 4)
+
+@t{(split cursor @ref{unit-toplevel-expression,toplevel-expression})} in
+  (1 (2 |3) 4)
+@result{} (1 (2 ))|((3) 4)
+@end example
+@end deffn
+
+@defgena{join,@toppackage{}.expression} cursor unit
+
+Join the innermost @ref{term-expression,expressions} @math{e_1} and
+@math{e_2} that precede and follow @var{cursor} respectively by deleting
+the buffer items that make up the closing delimiter of @math{e_1} and
+the buffer items that make up the opening delimiter of @math{e_2}.
+
+@var{unit} must be @ref{unit-expression,@t{expression}} at the moment.
+
+The return value of this function is unspecified.
+
+After the operation, @var{cursor} resides between the buffer items that
+make up the two child expressions of the joined expressions that were
+the last and first child of @math{e_1} and @math{e_2} respectively.
+
+When there is either expression following or preceding @var{cursor}, signal
+@ref{Class @toppackage{}.expression|no-expression-after-cursor-error,@t{no-expression-after-cursor-error}}
+or
+@ref{Class @toppackage{}.expression|no-expression-before-cursor-error,@t{no-expression-before-cursor-error}},
+respectively.
+
+Example:
+@example
+@t{(join cursor @ref{unit-expression,expression})} in
+  (1 2) |(3 4)
+@result{} (1 2 |3 4)
+@end example
+@end deffn

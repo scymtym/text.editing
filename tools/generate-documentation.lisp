@@ -35,14 +35,15 @@
     (format t "@item~%")
     (format t "@tindex ~(~A~)~%" name)
     (format t "@cindex ~(~A~) unit~%" name)
-    (format t "@anchor{unit-~(~A~)}~:*@t{~(~A~)} @tab ~{~(~A~)~^, ~}@tab ~A~2%"
+    (format t "@anchor{unit-~(~A~)}~:*@t{~(~S~)} @tab ~{~(~A~)~^, ~}@tab ~A~2%"
             name superclass-names documentation)))
 
 (defstruct node value children)
 
 (defun emit-unit-graph (stream)
-  (let ((remaining (edit:all-units))
-        (by-class  (make-hash-table :test #'eq)))
+  (let* ((all       (edit:all-units))
+         (remaining all)
+         (by-class  (make-hash-table :test #'eq)))
     (labels ((add (unit-class)
                (or (gethash unit-class by-class)
                    (let ((node (make-node :value unit-class)))
@@ -66,10 +67,10 @@
             (lambda (stream depth node)
               (declare (ignore depth))
               (let* ((class (node-value node))
-                     (name  (string-downcase (class-name class))))
-                (if (null (sb-mop:class-direct-subclasses class))
-                    (format stream "@ref{unit-~A,~:*~A}" name)
-                    (write-string name stream))))
+                     (name  (class-name class)))
+                (if (member class all :key #'class-of)
+                    (format stream "@ref{unit-~(~A~),~:*~(~S~)}" name)
+                    (write-string (string-downcase name) stream))))
             nil #'node-children)))
         (format stream "~&@end example~%")))))
 

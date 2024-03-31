@@ -43,6 +43,7 @@ This manual is for @sysname{} version @sysversion{}.
 * Concepts::
 * External Protocols::
 * Search::
+* Expressions::
 * Equivalent Emacs Commands::
 * Concept index::
 * Function and macro and variable and type index::
@@ -55,6 +56,8 @@ This manual is for @sysname{} version @sysversion{}.
 @include chapter-external-protocols.texi
 
 @include chapter-search.texi
+
+@include chapter-expressions.texi
 
 @include generated-chapter-equivalent-emacs-commands.texi
 
