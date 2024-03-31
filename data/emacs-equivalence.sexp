@@ -32,7 +32,13 @@
     (:backward ("backward-paragraph" :key "M-{")))
    (page
     (:forward  ("forward-page"  :key "C-x ]"))
-    (:backward ("backward-page" :key "C-x [")))))
+    (:backward ("backward-page" :key "C-x [")))
+   (text.editing.expression:expression
+    (:forward  ("forward-sexp"  :key "C-M-f"))
+    (:backward ("backward-sexp" :key "C-M-b")))
+   (text.editing.expression:toplevel-expression
+    (:forward  ("end-of-defun"       :key "C-M-e"))
+    (:backward ("beginning-of-defun" :key "C-M-a")))))
  ("Deletion"
   (delete (unit direction)
    (region
@@ -61,7 +67,7 @@
    (paragraph
     (:forward  ("kill-paragraph"          :arguments (1)))
     (:backward ("backward-kill-paragraph" :arguments (1))))
-   (expression
+   (text.editing.expression:expression
     (:forward  ("kill-sexp"          :arguments (1) :key "C-M-k"))
     (:backward ("backward-kill-sexp" :arguments (1) :key "C-M-<backspace>"))))
   (delete-indentation ()
@@ -83,7 +89,11 @@
    (paragraph
     (:forward ("mark-paragraph" :key "M-h")))
    (page
-    (:forward ("mark-page" :key "C-x C-p")))))
+    (:forward ("mark-page" :key "C-x C-p")))
+   (text.editing.expression:expression
+    (:forward ("mark-sexp" :key "C-M-@" #+(or) "C-M-SPC")))
+   (text.editing.expression:toplevel-expression
+    (:forward ("mark-defun" :key "C-M-h")))))
  ("Transformation"
   (change-case (unit direction case)
    (:region
@@ -115,12 +125,21 @@
     (:forward ("transpose-sentences" :arguments (1))))
    (paragraph
     (:forward ("transpose-paragraphs" :arguments (1))))
-   (expression
+   (text.editing.expression:expression
     (:forward ("transpose-sexps" :key "C-M-t")))))
  ("Paredit"
   (:wrap (unit)
-   (:expression ("paredit-wrap-sexp" :arguments ("argument" "open" "close"))))
-  (:splice (unit)
-   (:expression ("paredit-splice-sexp" :key "M-s")))
-  (:raise (unit)
-   (:expression ("paredit-raise-sexp" :key "M-r")))))
+   (text.editing.expression:expression
+    ("paredit-wrap-sexp" :arguments ("argument" "open" "close"))))
+  (text.editing.expression:raise (unit)
+   (text.editing.expression:expression
+    ("paredit-raise-sexp" :key "M-r")))
+  (text.editing.expression:splice (unit)
+   (text.editing.expression:expression
+    ("paredit-splice-sexp" :key "M-s")))
+  (text.editing.expression:split (unit)
+   (text.editing.expression:expression
+    ("paredit-split-sexp" :key "M-S")))
+  (text.editing.expression:join (unit)
+   (text.editing.expression:expression
+    ("paredit-join-sexp" :key "M-J")))))

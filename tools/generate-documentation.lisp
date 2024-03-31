@@ -117,7 +117,10 @@
                        (format t "@item     ~{~24@<@t{~(~S~)}~> @tab ~}~
                                   @t{~A~@[ ~{~A~^ ~}~]}~@[ (@kbd{~A})~]~
                                   ~@[ (@emph{~A})~]~%"
-                               (list* operation (reverse acc))
+                               (if (keywordp operation)
+                                   (make-list (1+ (length acc))
+                                              :initial-element "@emph{not implemented}")
+                                   (list* operation (reverse acc)))
                                command arguments
                                (when key
                                  (with-output-to-string (*standard-output*)
