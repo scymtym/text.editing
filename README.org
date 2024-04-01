@@ -29,8 +29,7 @@
 
   + Undo (work in progress)
 
-  + Operations on expression (like paredit for Emacs, work in
-    progress)
+  + Operations on expression (like paredit for Emacs)
 
   + Search and incremental search
 
