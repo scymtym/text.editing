@@ -57,6 +57,7 @@ $(NAME).pdf: $(INPUTS) $(PDFS)
 $(NAME).html: $(INPUTS) $(IMAGES) $(wildcard *.css)
 	makeinfo --html --no-split --no-headers                                 \
 	         --css-include=style-common.css --css-include=style-single.css  \
+	         --set-customization-variable 'HTML_MATH t4h'                   \
 	         $(NAME).texi
 
 clean:

@@ -157,9 +157,9 @@ For the description of the protocol functions in this section, we need
 the following definition: Let @math{r_s}, the @dfn{start relation}, and
 @math{r_e}, the @dfn{end relation}, be either @math{<} or @math{\le}
 respectively. An expression with start location @math{s} and end
-location @math{e} @anchor{term-contains}@dfn{contains} a cursor with
-respect to @math{r_s} and @math{r_e} iff @math{r_s(s, c) \wedge r_e(c,
-e)}.
+location @math{e} @anchor{term-contains}@dfn{contains} a cursor @math{c}
+with respect to @math{r_s} and @math{r_e} iff @math{r_s(s, c) \wedge
+r_e(c, e)}.
 
 @defgena{map-expressions-containing-cursor,@toppackage{}.expression} @
   function cursor syntax-tree @pkey{} start-relation end-relation
