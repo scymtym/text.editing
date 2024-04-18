@@ -104,6 +104,24 @@ expression before or after the cursor is attempted and no such
 expression exists.
 @end deftp
 
+@defclassa{expression-does-not-have-children-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+with children is attempted on an expression that does not have any
+children.
+@end deftp
+
+@defclassa{no-expression-after-expression-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+after some designated expression is attempted and no such expression
+exists.
+@end deftp
+
+@defclassa{no-expression-before-expression-error,@toppackage{}.expression}
+This error is signaled when an operation that requires an expression
+before some designated expression is attempted and no such expression
+exists.
+@end deftp
+
 @node Expression Node Protocol
 @subsection Expression Node Protocol
 
@@ -364,7 +382,8 @@ After the operation, @var{cursor} resides between the buffer items that
 make up the two child expressions of the joined expressions that were
 the last and first child of @math{e_1} and @math{e_2} respectively.
 
-When there is either expression following or preceding @var{cursor}, signal
+When there is no expression either following or preceding @var{cursor},
+signal
 @ref{Class @toppackage{}.expression|no-expression-after-cursor-error,@t{no-expression-after-cursor-error}}
 or
 @ref{Class @toppackage{}.expression|no-expression-before-cursor-error,@t{no-expression-before-cursor-error}},
@@ -375,5 +394,93 @@ Example:
 @t{(join cursor @ref{unit-expression,expression})} in
   (1 2) |(3 4)
 @result{} (1 2 |3 4)
+@end example
+@end deffn
+
+@defgena{eject,@toppackage{}.expression} cursor unit direction
+
+Assuming an expression @math{e} (or possibly other unit as specified by
+@var{unit}) contains @var{cursor}, depending on @var{direction}, move
+the last child of @math{e} after the end of @math{e} or move the first
+child of @math{e} before the start of @math{e}.
+
+@var{unit} must be @ref{unit-expression,@t{expression}} at the moment.
+
+@var{direction} must be either @t{:forward} or @t{:backward}.  If
+@var{direction} is @t{:forward}, move the last child of @math{e} after
+the end of @math{e}.  If @var{direction} is @t{:backward}, move the
+first child of @math{e} before the start of @math{e}
+
+After the operation, @var{cursor} is still contained in @math{e}.
+
+If @var{cursor} is not contained in any expression, signal
+@ref{Class @toppackage{}.expression|cursor-not-inside-expression-error,@t{cursor-not-inside-expression-error}}.
+If the expression @math{e} does not have any children, signal
+@ref{Class @toppackage{}.expression|expression-does-not-have-children-error,@t{expression-does-not-have-children-error}}.
+
+Examples:
+@example
+@t{(eject cursor @ref{unit-expression,expression} :forward)} in
+  (1 2 3 4|)
+@result{} (1 2 3|) 4
+
+@t{(eject cursor @ref{unit-expression,expression} :backward)} in
+  (1 2 |3 4)
+@result{} 1 (2 |3 4)
+@end example
+@end deffn
+
+@defgena{absorb,@toppackage{}.expression} cursor unit direction
+
+Assuming an expression @math{e} contains @var{cursor} and a ``target''
+expression @math{t} follows or precedes @math{e}, depending on
+@var{direction}, move @math{t} into @math{e}.
+
+@itemize
+
+@item
+If @math{e} is a toplevel expression, try to find the target expression
+before or after @math{e} in the sequence of toplevel expressions.
+
+@item
+If @math{e} is not toplevel expression, try to find the target
+expression before or after @math{e} in the children of @math{p}, the
+parent of @math{e}.  If there is no suitable target expression among the
+children of @math{p}, repeat the process with @math{p} instead of
+@math{e}.  In other words, look for a suitable target expression before
+or after each ancestor of @math{e} proceeding from the innermost
+expression (which is @math{e}) to the toplevel ancestor of @math{e}.
+
+@end itemize
+
+@var{unit} must be @ref{unit-expression,@t{expression}} at the moment.
+
+@var{direction} must be either @t{:forward} or @t{:backward}.  If
+@var{direction} is @t{:forward}, move a ``target'' expression that
+follows @math{e} into @math{e} as the last child.  If @var{direction} is
+@t{:backward}, move a ``target'' expression that precedes @math{e} into
+@math{e} as the first child.
+
+After the operation, @var{cursor} is at the same location relative to
+the unmodified boundary of @math{e} as before.
+
+If @var{cursor} is not contained in any expression, signal
+@ref{Class @toppackage{}.expression|cursor-not-inside-expression-error,@t{cursor-not-inside-expression-error}}.
+When there is no expression either following or preceding (an ancestor
+of) @math{e}, signal
+@ref{Class @toppackage{}.expression|no-expression-after-expression-error,@t{no-expression-after-expression-error}}
+or
+@ref{Class @toppackage{}.expression|no-expression-before-expression-error,@t{no-expression-before-expression-error}},
+respectively.
+
+Examples:
+@example
+@t{(absorb cursor @ref{unit-expression,expression} :forward)} in
+  (1 2 | 3) 4
+@result{} (1 2 | 3 4)
+
+@t{(absorb cursor @ref{unit-expression,expression} :backward)} in
+  1 (|2 3 4)
+@result{} (1 |2 3 4)
 @end example
 @end deffn

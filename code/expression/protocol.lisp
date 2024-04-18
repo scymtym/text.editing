@@ -93,3 +93,7 @@
 (defgeneric split (cursor unit))
 
 (defgeneric join (cursor unit))
+
+(defgeneric eject (cursor unit direction))
+
+(defgeneric absorb (cursor unit direction))

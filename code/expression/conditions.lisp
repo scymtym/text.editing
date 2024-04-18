@@ -51,3 +51,36 @@
    (lambda (condition stream)
      (format stream "~@<The expression ~A is already at toplevel.~@:>"
              (expression condition)))))
+
+(define-condition expression-does-not-have-children-error
+    (expression-condition
+     edit:maybe-site-condition
+     edit:cursor-condition
+     error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<The expression ~A does not have any children.~@:>"
+             (expression condition)))))
+
+(define-condition no-expression-before-expression-error
+    (expression-condition
+     edit:maybe-site-condition
+     edit:cursor-condition
+     error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<There is no expression before the expression ~A.~@:>"
+             (expression condition)))))
+
+(define-condition no-expression-after-expression-error
+    (expression-condition
+     edit:maybe-site-condition
+     edit:cursor-condition
+     error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<There is no expression after expression ~A.~@:>"
+             (expression condition)))))

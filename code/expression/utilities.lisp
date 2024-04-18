@@ -6,6 +6,25 @@
 
 (cl:in-package #:text.editing.expression)
 
+(defun expression<= (expression1 expression2)
+  (multiple-value-bind (start-line1 start-column1 end-line1 end-column1)
+      (range expression1)
+    (declare (ignore start-line1 start-column1))
+    (multiple-value-bind (start-line2 start-column2) (range expression2)
+      (or (< end-line1 start-line2)
+          (and (= end-line1 start-line2)
+               (<= end-column1 start-column2))))))
+
+;;; TODO replace this with a protocol function for querying properties
+;;; of the expression.
+(defun compound-expression-p (expression buffer)
+  (multiple-value-bind (start-line start-column end-line end-column)
+      (range expression)
+    (declare (ignore start-line start-column))
+    (let* ((end-line  (cluffer:find-line buffer end-line))
+           (last-item (cluffer:item-at-position end-line (1- end-column))))
+      (eql last-item #\)))))
+
 (defun move-to-expression-boundary (cursor expression which)
   (multiple-value-bind (line column)
       (ecase which
@@ -23,23 +42,26 @@
      (move-to-expression-boundary ,cursor-var ,expression ,which)
      ,@body))
 
-(defun move-delimiter-forward (cursor &key (test (lambda (character)
-                                                   (find character "#(\""))))
-  (edit::apply-at-cursor-until
-   (lambda (cursor item)
-     (declare (ignore item))
-     (edit:move-item-forward cursor))
-   cursor #'cluffer:end-of-buffer-p
-   (complement test) #'edit::item-after-cursor*))
+(defgeneric move-delimiter (cursor direction &key test)
+  (:method ((cursor c:cursor) (direction (eql :forward))
+            &key (test (lambda (character)
+                         (find character "#(\""))))
+    (edit::apply-at-cursor-until
+     (lambda (cursor item)
+       (declare (ignore item))
+       (edit:move-item-forward cursor))
+     cursor #'cluffer:end-of-buffer-p
+     (complement test) #'edit::item-after-cursor*))
 
-(defun move-delimiter-backward (cursor &key (test (lambda (character)
-                                                    (find character ")\""))))
-  (edit::apply-at-cursor-until
-   (lambda (cursor item)
-     (declare (ignore item))
-     (edit:move-item-backward cursor))
-   cursor #'cluffer:beginning-of-buffer-p
-   (complement test) #'edit::item-before-cursor*))
+  (:method ((cursor c:cursor) (direction (eql :backward))
+            &key (test (lambda (character)
+                         (find character ")\""))))
+    (edit::apply-at-cursor-until
+     (lambda (cursor item)
+       (declare (ignore item))
+       (edit:move-item-backward cursor))
+     cursor #'cluffer:beginning-of-buffer-p
+     (complement test) #'edit::item-before-cursor*)))
 
 ;;; Starting from the location of CURSOR, locate the next/previous
 ;;; expression and possibly move CURSOR to the beginning/end of that

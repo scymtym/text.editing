@@ -91,10 +91,10 @@
                 ;; inwards over delimiter in case there is no
                 ;; respective child.
                 (if (null first-child)
-                    (move-delimiter-forward child-start)
+                    (move-delimiter child-start :forward)
                     (move-to-expression-boundary child-start first-child :start))
                 (if (null last-child)
-                    (move-delimiter-backward child-end)
+                    (move-delimiter child-end :backward)
                     (move-to-expression-boundary child-end last-child :end))
                 ;; For DIRECTION being `:forward', after identifying
                 ;; all sub-expressions, the general situation should
@@ -149,13 +149,15 @@
              (with-cursor-at-expression-boundary (start cursor expression :start)
                (edit:with-cloned-cursor (first-child-start start)
                  (if (null first-child)
-                     (move-delimiter-forward first-child-start)
-                     (move-to-expression-boundary first-child-start first-child :start))
+                     (move-delimiter first-child-start :forward)
+                     (move-to-expression-boundary
+                      first-child-start first-child :start))
                  (with-cursor-at-expression-boundary (end cursor expression :end)
                    (edit:with-cloned-cursor (last-child-end end)
                      (if (null last-child)
-                         (move-delimiter-backward last-child-end)
-                         (move-to-expression-boundary last-child-end last-child :end))
+                         (move-delimiter last-child-end :backward)
+                         (move-to-expression-boundary
+                          last-child-end last-child :end))
                      (let ((opening (edit:items start first-child-start :forward))
                            (closing (edit:items last-child-end end :forward)))
                        (values (trim opening t) (trim closing nil)))))))))
@@ -252,3 +254,155 @@
               ;; TODO this is not appropriate when merging strings
               (when (c:cursor= end1 start2)
                 (edit:insert-item start2 #\Space)))))))))
+
+(defmethod eject ((cursor c:cursor) (unit expression) (direction t))
+  (let* ((syntax-tree (syntax-tree unit))
+         (expression  (block nil
+                        (let ((buffer (cluffer:buffer cursor)))
+                          (multiple-value-bind (start-relation end-relation)
+                              (ecase direction
+                                (:forward  (values '<= '<))
+                                (:backward (values '<  '<=)))
+                            (map-expressions-containing-cursor
+                             (lambda (expression)
+                               (when (compound-expression-p expression buffer)
+                                 (return expression)))
+                             cursor syntax-tree :start-relation start-relation
+                                                :end-relation   end-relation)))
+                        nil)))
+    (when (null expression)
+      (error 'cursor-not-inside-expression-error :cursor cursor))
+    (multiple-value-bind (child sibling)
+        (let ((children (children expression)))
+          (ecase direction
+            (:forward  (values-list (reverse (last children 2))))
+            (:backward (values (first children) (second children)))))
+      (when (null child)
+        (error 'expression-does-not-have-children-error :cursor     cursor
+                                                        :expression expression))
+      ;; After the expression and the child have been identified, the
+      ;; situation should look similar to these examples:
+      ;;
+      ;;   EXPRESSION                  EXPRESSION
+      ;;   ────────────                ────────────
+      ;;   #(1 ↑ 3 4 5)                #(1 ↑ 3 4 5)
+      ;;           ─ ─                   ─   ─
+      ;;             CHILD                   SIBLING
+      ;;           SIBLING               CHILD
+      ;;
+      ;;   (DIRECTION `:forward')      (DIRECTION `:backward')
+      (edit:with-cloned-cursor (sibling-boundary cursor)
+        (if (null sibling)
+            (move-to-expression-boundary
+             sibling-boundary child (ecase direction
+                                      (:forward  :start)
+                                      (:backward :end)))
+            (move-to-expression-boundary sibling-boundary sibling direction))
+        (with-cursor-at-expression-boundary
+            (child-boundary cursor child direction)
+          (with-cursor-at-expression-boundary
+              (boundary cursor expression direction)
+            (let ((adjusted-cursor-p nil))
+              ;; Move CURSOR to ensure that it will be inside the
+              ;; modified EXPRESSION.
+              (ecase direction
+                (:forward
+                 (loop :while (cluffer:cursor<= sibling-boundary cursor)
+                       :do (setf adjusted-cursor-p t)
+                           (edit:move-item-backward cursor)))
+                (:backward
+                 (loop :while (cluffer:cursor<= cursor sibling-boundary)
+                       :do (setf adjusted-cursor-p t)
+                           (edit:move-item-forward cursor))))
+              (ecase direction
+                (:forward
+                 (shiftf (edit:items sibling-boundary sibling-boundary :forward)
+                         (edit:items child-boundary   boundary         :forward)
+                         ""))
+                (:backward
+                 (shiftf (edit:items sibling-boundary sibling-boundary :forward)
+                         (edit:items boundary         child-boundary   :forward)
+                         "")))
+              (when adjusted-cursor-p
+                (ecase direction
+                  (:forward  (edit:move-item-forward cursor))
+                  (:backward (edit:move-item-backward cursor)))))))))))
+
+;;; Find a compound expression that contains CURSOR and is
+;;; followed/preceded (depending on DIRECTION) by a suitable "target"
+;;; expression.
+(defun absorption-context (cursor syntax-tree direction)
+  (multiple-value-bind (start-relation end-relation)
+      (ecase direction
+        (:forward  (values '<= '<))
+        (:backward (values '<  '<=)))
+    (let ((buffer          (cluffer:buffer cursor))
+          (best-expression nil)
+          (best-child      nil)
+          (best-target     nil))
+      (block nil
+        (map-expressions-containing-cursor
+         (lambda (expression)
+           (when (compound-expression-p expression buffer)
+             (setf best-expression expression)
+             (let* ((children (children expression))
+                    (child    (ecase direction
+                                (:forward  (a:lastcar children))
+                                (:backward (first     children))))
+                    (target   (with-cursor-at-expression-boundary
+                                  (scan cursor expression direction)
+                                (maybe-advance-to-expression
+                                 scan direction syntax-tree
+                                 :start-relation start-relation
+                                 :end-relation   end-relation))))
+               (when (and (not (null target))
+                          (ecase direction
+                            (:forward  (expression<= expression target))
+                            (:backward (expression<= target expression))))
+                 (setf best-child child best-target target)
+                 (return)))))
+         cursor syntax-tree :start-relation start-relation
+                            :end-relation   end-relation))
+      (values best-expression best-child best-target))))
+
+(defmethod absorb ((cursor c:cursor) (unit expression) (direction t))
+  (multiple-value-bind (expression child target)
+      (absorption-context cursor (syntax-tree unit) direction)
+    ;; The operation needs EXPRESSION and TARGET while CHILD is
+    ;; optional.
+    (when (null expression)
+      (error 'cursor-not-inside-expression-error :cursor cursor))
+    (when (null target)
+      (let ((class (ecase direction
+                     (:forward  'no-expression-after-expression-error)
+                     (:backward 'no-expression-before-expression-error))))
+        (error class :cursor cursor :expression expression)))
+    ;; After the absorbing expression, the target expression and
+    ;; optionally a child of the absorbing expression have been
+    ;; identified, the situation should look similar to these
+    ;; examples:
+    ;;
+    ;;   EXPRESSION                           EXPRESSION
+    ;;   ────────────                         ────────────
+    ;;   #(1 ↑ 2 3 4)     5            1      #(2 ↑ 3 4 5)
+    ;;             ─      ─            ─        ─
+    ;;             CHILD  TARGET       TARGET  CHILD
+    ;;
+    ;;   (DIRECTION `:forward')        (DIRECTION `:backward')
+    (with-cursor-at-expression-boundary
+        (boundary cursor expression direction)
+      (edit:with-cloned-cursor (child-boundary boundary)
+        (if (null child)
+            (move-delimiter child-boundary (edit::opposite-direction direction))
+            (move-to-expression-boundary child-boundary child direction))
+        (with-cursor-at-expression-boundary
+            (target-boundary cursor target direction)
+          (ecase direction
+            (:forward
+             (shiftf (edit:items target-boundary target-boundary :forward)
+                     (edit:items child-boundary  boundary        :forward)
+                     ""))
+            (:backward
+             (shiftf (edit:items target-boundary target-boundary :forward)
+                     (edit:items boundary        child-boundary  :forward)
+                     ""))))))))

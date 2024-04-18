@@ -18,7 +18,10 @@
    #:cursor-not-inside-expression-error
    #:no-expression-before-cursor-error
    #:no-expression-after-cursor-error
-   #:expression-at-toplevel-error)
+   #:expression-at-toplevel-error
+   #:expression-does-not-have-children-error
+   #:no-expression-before-expression-error
+   #:no-expression-after-expression-error)
 
   ;; Expression node protocol
   (:export
@@ -53,4 +56,7 @@
    #:raise
    #:splice
    #:split
-   #:join))
+   #:join
+
+   #:eject
+   #:absorb))
