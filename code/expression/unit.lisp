@@ -41,8 +41,8 @@ the `expression' unit."))
            (error 'no-expression-after-cursor-error :cursor cursor))
          ;; Apply CONTINUATION until CURSOR reaches the end of
          ;; EXPRESSION.
-         (with-cloned-cursor-at-expression-end
-             (end-cursor cursor expression)
+         (with-cursor-at-expression-boundary
+             (end-cursor cursor expression :end)
            (edit::apply-at-cursor-until
             continuation cursor
             (lambda (cursor)
@@ -54,8 +54,8 @@ the `expression' unit."))
            (error 'no-expression-before-cursor-error :cursor cursor))
          ;; Apply CONTINUATION until CURSOR reaches the start of
          ;; EXPRESSION.
-         (with-cloned-cursor-at-expression-start
-             (start-cursor cursor expression)
+         (with-cursor-at-expression-boundary
+             (start-cursor cursor expression :start)
            (edit::apply-at-cursor-until
             continuation cursor
             (lambda (cursor)
@@ -95,7 +95,7 @@ the `expression' unit."))
                          :advance-to-child   nil
                          :move-cursor        nil)))
       (unless (null expression)
-        (move-to-expression-start cursor expression))
+        (move-to-expression-boundary cursor expression :start))
       (forward continuation cursor expression)))
 
   (defmethod edit:apply-from-cursor ((continuation t)
@@ -127,7 +127,8 @@ the `expression' unit."))
                          :start-relation     '<
                          :end-relation       '<=
                          :initial-expression initial
-                         :advance-to-child   nil)))
+                         :advance-to-child   nil
+                         :move-cursor        nil)))
       (unless (null expression)
-        (move-to-expression-end cursor expression))
+        (move-to-expression-boundary cursor expression :end))
       (backward continuation cursor expression))))

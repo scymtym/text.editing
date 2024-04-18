@@ -36,10 +36,10 @@
       ;;
       ;; Sub-expression are indicated by over- and underlines, items
       ;; that should be deleted are indicated by x.
-      (with-cloned-cursor-at-expression-start (parent-start cursor parent)
-        (with-cloned-cursor-at-expression-end (parent-end cursor parent)
-          (with-cloned-cursor-at-expression-start (start cursor expression)
-            (with-cloned-cursor-at-expression-end (end cursor expression)
+      (with-cursor-at-expression-boundary (parent-start cursor parent :start)
+        (with-cursor-at-expression-boundary (parent-end cursor parent :end)
+          (with-cursor-at-expression-boundary (start cursor expression :start)
+            (with-cursor-at-expression-boundary (end cursor expression :end)
               (edit:delete parent-start start      :forward)
               (edit:delete end          parent-end :forward))))))))
 
@@ -50,9 +50,9 @@
     (when (null expression)
       (error 'cursor-not-inside-expression-error :cursor cursor))
     (let ((children (children expression)))
-      (with-cloned-cursor-at-expression-start (start cursor expression)
+      (with-cursor-at-expression-boundary (start cursor expression :start)
         (edit:with-cloned-cursor (child-start start)
-          (with-cloned-cursor-at-expression-end (end cursor expression)
+          (with-cursor-at-expression-boundary (end cursor expression :end)
             (edit:with-cloned-cursor (child-end end)
               (multiple-value-bind (first-child last-child emptyp)
                   (ecase direction
@@ -66,8 +66,8 @@
                        (loop :for previous = nil :then child
                              :for (child . rest) :on children
                              :for done = (progn
-                                           (move-to-expression-start
-                                            probe child)
+                                           (move-to-expression-boundary
+                                            probe child :start)
                                            (cluffer:cursor<= cursor probe))
                              :until done
                              :finally (return
@@ -92,10 +92,10 @@
                 ;; respective child.
                 (if (null first-child)
                     (move-delimiter-forward child-start)
-                    (move-to-expression-start child-start first-child))
+                    (move-to-expression-boundary child-start first-child :start))
                 (if (null last-child)
                     (move-delimiter-backward child-end)
-                    (move-to-expression-end child-end last-child))
+                    (move-to-expression-boundary child-end last-child :end))
                 ;; For DIRECTION being `:forward', after identifying
                 ;; all sub-expressions, the general situation should
                 ;; look something like this
@@ -146,16 +146,16 @@
              ;; Sub-expression are indicated by over- and underlines,
              ;; items that should be copied as new delimiters are
              ;; indicated by *.
-             (with-cloned-cursor-at-expression-start (start cursor expression)
+             (with-cursor-at-expression-boundary (start cursor expression :start)
                (edit:with-cloned-cursor (first-child-start start)
                  (if (null first-child)
                      (move-delimiter-forward first-child-start)
-                     (move-to-expression-start first-child-start first-child))
-                 (with-cloned-cursor-at-expression-end (end cursor expression)
+                     (move-to-expression-boundary first-child-start first-child :start))
+                 (with-cursor-at-expression-boundary (end cursor expression :end)
                    (edit:with-cloned-cursor (last-child-end end)
                      (if (null last-child)
                          (move-delimiter-backward last-child-end)
-                         (move-to-expression-end last-child-end last-child))
+                         (move-to-expression-boundary last-child-end last-child :end))
                      (let ((opening (edit:items start first-child-start :forward))
                            (closing (edit:items last-child-end end :forward)))
                        (values (trim opening t) (trim closing nil)))))))))
@@ -235,16 +235,16 @@
       ;;
       ;; Sub-expression are indicated by over- and underlines, items
       ;; that should be deleted are indicated by x.
-      (with-cloned-cursor-at-expression-end (end1 cursor expression1)
+      (with-cursor-at-expression-boundary (end1 cursor expression1 :end)
         (edit:with-cloned-cursor (child1-end end1)
           (if (null last-child1)
               (edit:move-item-backward child1-end)
-              (move-to-expression-end child1-end last-child1))
-          (with-cloned-cursor-at-expression-start (start2 cursor expression2)
+              (move-to-expression-boundary child1-end last-child1 :end))
+          (with-cursor-at-expression-boundary (start2 cursor expression2 :start)
             (edit:with-cloned-cursor (child2-start start2)
               (if (null first-child2)
                   (edit:move-item-forward child2-start)
-                  (move-to-expression-start child2-start first-child2))
+                  (move-to-expression-boundary child2-start first-child2 :start))
               (edit:delete child1-end end1         :forward)
               (edit:delete start2     child2-start :forward)
               ;; If joining the expressions would merge tokens,

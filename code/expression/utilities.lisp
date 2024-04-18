@@ -6,26 +6,21 @@
 
 (cl:in-package #:text.editing.expression)
 
-(defun move-to-expression-start (cursor expression)
-  (multiple-value-bind (start-line start-column) (range expression)
-    (edit:move-cursor-to-line cursor start-line start-column)))
+(defun move-to-expression-boundary (cursor expression which)
+  (multiple-value-bind (line column)
+      (ecase which
+        ((:start :backward) (range expression))
+        ((:end   :forward)  (multiple-value-bind (start-line start-column
+                                                  end-line   end-column)
+                                (range expression)
+                              (declare (ignore start-line start-column))
+                              (values end-line end-column))))
+    (edit:move-cursor-to-line cursor line column)))
 
-(defun move-to-expression-end (cursor expression)
-  (multiple-value-bind (start-line start-column end-line end-column)
-      (range expression)
-    (declare (ignore start-line start-column))
-    (edit:move-cursor-to-line cursor end-line end-column)))
-
-(defmacro with-cloned-cursor-at-expression-start ((cursor-var cursor expression)
-                                                  &body body)
+(defmacro with-cursor-at-expression-boundary
+    ((cursor-var cursor expression which) &body body)
   `(edit:with-cloned-cursor (,cursor-var ,cursor)
-     (move-to-expression-start ,cursor-var ,expression)
-     ,@body))
-
-(defmacro with-cloned-cursor-at-expression-end ((cursor-var cursor expression)
-                                                  &body body)
-  `(edit:with-cloned-cursor (,cursor-var ,cursor)
-     (move-to-expression-end ,cursor-var ,expression)
+     (move-to-expression-boundary ,cursor-var ,expression ,which)
      ,@body))
 
 (defun move-delimiter-forward (cursor &key (test (lambda (character)

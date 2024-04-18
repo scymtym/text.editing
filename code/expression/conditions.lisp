@@ -46,7 +46,7 @@
                                                 edit:maybe-site-condition
                                                 edit:cursor-condition
                                                 error)
-  ((%expression ))
+  ()
   (:report
    (lambda (condition stream)
      (format stream "~@<The expression ~A is already at toplevel.~@:>"
