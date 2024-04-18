@@ -96,7 +96,7 @@
     (:forward ("mark-defun" :key "C-M-h")))))
  ("Transformation"
   (change-case (unit direction case)
-   (:region
+   (region
     (:forward
      (:up      ("upcase-region"     :arguments ("beg" "end") :key "C-x C-u"))
      (:down    ("downcase-region"   :arguments ("beg" "end") :key "C-x C-l"))
@@ -127,7 +127,7 @@
     (:forward ("transpose-paragraphs" :arguments (1))))
    (text.editing.expression:expression
     (:forward ("transpose-sexps" :key "C-M-t")))))
- ("Paredit"
+ ("Structure Editing"
   (:wrap (unit)
    (text.editing.expression:expression
     ("paredit-wrap-sexp" :arguments ("argument" "open" "close"))))
@@ -139,7 +139,19 @@
     ("paredit-splice-sexp" :key "M-s")))
   (text.editing.expression:split (unit)
    (text.editing.expression:expression
-    ("paredit-split-sexp" :key "M-S")))
+    ("paredit-split-sexp" :key "M-S"))
+   (text.editing.expression:toplevel-expression
+    "?"))
   (text.editing.expression:join (unit)
    (text.editing.expression:expression
-    ("paredit-join-sexp" :key "M-J")))))
+    ("paredit-join-sexp" :key "M-J")))
+  (text.editing.expression:eject (unit direction)
+   (text.editing.expression:expression
+    (:forward  ("paredit-forward-barf-sexp"  :key "C-<left>"))
+    (:backward ("paredit-backward-barf-sexp" :key "C-M-<right>"))))
+  (text.editing.expression:absorb (unit direction)
+   (text.editing.expression:expression
+    (:forward  ("paredit-forward-slurp-sexp"  :key      "C-<right>"
+                                              :mismatch "Emacs moves point differently"))
+    (:backward ("paredit-backward-slurp-sexp" :key      "C-M-<left>"
+                                              :mismatch "Emacs moves point differently"))))))
