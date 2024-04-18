@@ -33,6 +33,13 @@
 (defmethod x:children ((expression line+column-cst))
   '())
 
+(defmethod print-object ((object line+column-cst) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (multiple-value-bind (start-line start-column end-line end-column)
+        (x:range object)
+      (format stream "~D:~D - ~D:~D"
+              start-line start-column end-line end-column))))
+
 (defclass line+column-atom-cst (line+column-cst cst:atom-cst) ())
 
 (defclass line+column-cons-cst (line+column-cst cst:cons-cst) ())
