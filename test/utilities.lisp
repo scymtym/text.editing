@@ -349,7 +349,7 @@
 
 (defmacro operation-cases ((operation &key (buffer-class ''test-buffer)
                                            (target       :point))
-                           &rest clauses)
+                           &body clauses)
   "Perform OPERATION (not evaluated) for test cases specified by CLAUSES.
 
 TARGET (evaluated) controls on which level OPERATION is performed and
