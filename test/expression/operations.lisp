@@ -274,3 +274,22 @@
      ("1 ((2↑))"   'x:no-expression-after-expression-error "(1 (2↑))")
      ("((1↑) 2) 3" "((1↑ 2)) 3"                            'x:no-expression-before-expression-error)
      ("1 (2 (3↑))" 'x:no-expression-after-expression-error "1 ((2 3↑))"))))
+
+;;; Structure aware variants of ordinary operations
+
+(test delete-semi-line-or-expressions.smoke
+  "Smoke test for the `delete-semi-line-or-expressions' operation."
+  (operation-cases (x:delete-semi-line-or-expressions :buffer-class 'test-buffer)
+    ((:forward)
+     ("↑"                  'cluffer:end-of-buffer)
+     ("↑¶"                 "↑")
+     ("(↑)¶"               "(↑)¶")
+     ("(↑¶)"               "(↑)")
+     ("((↑))¶"             "((↑))¶")
+     ("((↑¶))"             "((↑))")
+     ("↑(foo) (bar¶baz)"   "↑")
+     ("↑ (foo) (bar¶baz)"  "↑")
+     (" (foo) ↑(bar¶baz)"  " (foo) ↑")
+     (" (foo) (bar↑¶baz)"  " (foo) (bar↑baz)")
+     ("↑ (foo) ¶(bar baz)" "↑¶(bar baz)")
+     ("(fo↑o (bar¶baz))"   "(fo↑)"))))

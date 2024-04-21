@@ -406,3 +406,101 @@
              (shiftf (edit:items target-boundary target-boundary :forward)
                      (edit:items boundary        child-boundary  :forward)
                      ""))))))))
+
+;;; Structure aware variants of ordinary operations
+
+(defmethod delete-semi-line-or-expressions ((cursor    c:cursor)
+                                            (direction (eql :forward)))
+  ;; The main issue is determining how far to delete in order to keep delimiters
+  ;; balanced: either to the end of the cursor line or to the end of an
+  ;; expression which starts on the cursor line.
+  (let* ((syntax-tree     :ast)
+         (cursor-line     (cluffer:line-number cursor))
+         (cursor-column   (cluffer:cursor-position cursor))
+         (best-expression nil)
+         (best-end-line   nil)
+         (best-end-column nil))
+    ;; First, in case CURSOR is contained in some expression(s), traverse
+    ;; expressions which properly contain CURSOR from the innermost outwards,
+    ;; remembering the "best" candidate as BEST-EXPRESSION. If a candidate
+    ;; expression has children, remember the end location of the last child
+    ;; which starts on the line of CURSOR before the column of CURSOR and give
+    ;; priority to the candidate expression.
+    (block nil
+      (map-expressions-containing-cursor
+       (lambda (candidate)
+         (let ((foundp nil))
+           (mapc (lambda (child)
+                   (multiple-value-bind (start-line start-column
+                                         end-line   end-column)
+                       (range child)
+                     (when (and (=  cursor-line   start-line)
+                                (<= cursor-column start-column))
+                       (setf best-end-line   end-line
+                             best-end-column end-column
+                             foundp          t))))
+                 (children candidate))
+           (when (or foundp (null best-expression))
+             (setf best-expression candidate))
+           (when foundp
+             (return))))
+       cursor syntax-tree :start-relation '< :end-relation '<))
+    ;; If the first search finds an expressions with or without a suitable
+    ;; child, the situation is like one of these:
+    ;;
+    ;;   BEST-EXPRESSION    BEST-EXPRESSION
+    ;;   ──────────         ─────────────
+    ;;   (1 ↑ 2 (3          (1  2 (3 4)↑)
+    ;;           4)
+    ;;    5 6)
+    ;;          ───
+    ;;          child (which ends at BEST-END-{LINE,COLUMN})
+    ;;
+    ;; In case the first search above did not find an expression, perform a
+    ;; second search which looks after CURSOR for expressions that start on the
+    ;; line of cursor but extend to the following line or lines.
+    (when (null best-expression)
+      (edit:with-cloned-cursor (scan cursor)
+        (loop for candidate = (maybe-advance-to-expression
+                               scan direction syntax-tree
+                               :start-relation '<= :end-relation '<)
+              until (null candidate)
+              do (multiple-value-bind (start-line start-column
+                                       end-line   end-column)
+                     (range candidate)
+                   (declare (ignore start-column))
+                   (when (/= start-line cursor-line)
+                     (loop-finish))
+                   (when (/= end-line cursor-line)
+                     (setf best-expression candidate
+                           best-end-line   end-line
+                           best-end-column end-column)
+                     (loop-finish))
+                   (move-to-expression-boundary scan candidate :end)))))
+    ;; If the second search finds an expressions, the situation is like this:
+    ;;
+    ;;             BEST-EXPRESSION (which ends at BEST-END-{LINE,COLUMN})
+    ;;             ─────
+    ;;   ↑   (1 2) (3 4
+    ;;              5 6)
+    ;;
+    ;; Perform deletion based on the result of the two searches above.
+    (cond ((null best-expression) ; nothing found
+           ;; Just delete to the end of the line.
+           (edit:delete cursor edit:semi-line :forward))
+          ((null best-end-line) ; expression but no end location
+           ;; If EXPRESSION ends on the cursor line, delete up to but excluding
+           ;; the closing delimiter of EXPRESSION. Otherwise delete to the end
+           ;; of the line.
+           (with-cursor-at-expression-boundary (end cursor best-expression :end)
+             (cond ((= (cluffer:line-number end) cursor-line)
+                    (move-delimiter end :backward)
+                    (edit:delete cursor end :forward))
+                   (t
+                    (edit:delete cursor edit:semi-line :forward)))))
+          (t ; end location
+           ;; Delete up to end location (either end of sub-expression or end of
+           ;; some following toplevel expression)
+           (edit:with-cloned-cursor (end cursor :line     best-end-line
+                                                :position best-end-column)
+             (edit:delete cursor end :forward))))))

@@ -84,7 +84,7 @@
   (:documentation
    "Return a designator of the syntax tree UNIT should operate on."))
 
-;;; Operations
+;;; Structure editing operations
 
 (defgeneric raise (cursor unit direction))
 
@@ -97,3 +97,7 @@
 (defgeneric eject (cursor unit direction))
 
 (defgeneric absorb (cursor unit direction))
+
+;;; Structure aware variants of ordinary operations
+
+(defgeneric delete-semi-line-or-expressions (cursor direction))

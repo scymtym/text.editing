@@ -53,10 +53,13 @@
 
   ;; Operations
   (:export
+   ;; Structure editing operations
    #:raise
    #:splice
    #:split
    #:join
 
    #:eject
-   #:absorb))
+   #:absorb
+   ;; Structure aware variants of ordinary operations
+   #:delete-semi-line-or-expressions))

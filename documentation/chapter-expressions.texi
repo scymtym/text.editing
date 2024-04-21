@@ -484,3 +484,36 @@ Examples:
 @result{} (1 |2 3 4)
 @end example
 @end deffn
+
+@defgena{delete-semi-line-or-expressions,@toppackage{}.expression} @
+  cursor direction
+
+For @var{cursor} located on line @math{l}, delete to either the end of
+@math{l} or to the end of some expression which starts on @math{l} so
+that delimiters are kept balanced.
+
+@var{direction} controls whether to delete from @var{cursor} towards the
+end of the line or towards the beginning of the line.  At the moment,
+@var{direction} has to be @t{:forward}.
+
+Examples:
+@example
+@t{(delete-semi-line-or-expressions cursor :forward)} in
+  (1 |2 (3 4) 5)
+@result{} (1 |)
+
+@t{(delete-semi-line-or-expressions cursor :forward)} in
+  (1 |2 (3
+         4)
+        5)
+@result{} (1 |
+        5)
+
+@t{(delete-semi-line-or-expressions cursor :forward)} in
+  1 |2 (3
+        4)
+  5
+@result{} 1 |
+  5
+@end example
+@end deffn
