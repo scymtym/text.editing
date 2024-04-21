@@ -245,7 +245,8 @@
   "Smoke test for the `eject' operation."
   (operation-cases (x:eject :buffer-class 'test-buffer)
     ((x:expression (:forward :backward))
-     ("↑"       'x:cursor-not-inside-expression-error 'x:cursor-not-inside-expression-error)
+     ("↑"       (:always 'x:cursor-not-inside-expression-error))
+     ("(↑)"     (:always 'x:expression-does-not-have-children-error))
      ("↑(1)"    "↑()1"                                'x:cursor-not-inside-expression-error)
      ("(↑1)"    "(↑)1"                                "1(↑)")
      ("(1↑)"    "(↑)1"                                "1(↑)")
@@ -260,7 +261,7 @@
   "Smoke test for the `absorb' operation."
   (operation-cases (x:absorb :buffer-class 'test-buffer)
     ((x:expression (:forward :backward))
-     ("↑"          'x:cursor-not-inside-expression-error   'x:cursor-not-inside-expression-error)
+     ("↑"          (:always 'x:cursor-not-inside-expression-error))
      ("(↑)"        'x:no-expression-after-expression-error 'x:no-expression-before-expression-error)
      ("↑(1)"       'x:no-expression-after-expression-error 'x:cursor-not-inside-expression-error)
      ("(1)↑"       'x:cursor-not-inside-expression-error   'x:no-expression-before-expression-error)
