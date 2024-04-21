@@ -90,10 +90,6 @@
       (setf (%cst buffer)
             (let* ((string (buffer-string buffer))
                    (client (make-instance 'client :source-string string)))
-              ;; Method on
-              ;; `x:map-expressions-containing-cursor-using-buffer'
-              ;; does not handle lines.
-              (assert (null (position #\Newline string)))
               (with-input-from-string (stream string)
                 (loop :for expression = (eclector.parse-result:read
                                          client stream nil stream)
@@ -104,15 +100,23 @@
     ((function t) (buffer test-buffer) (cursor cluffer:cursor) (syntax-tree t)
      &key (start-relation '<=) (end-relation '<))
   (let* ((cst           (cst buffer))
+         (cursor-line   (cluffer:line-number cursor))
          (cursor-column (cluffer:cursor-position cursor)))
-    (labels ((rec (node)
+    (labels ((compare (relation line1 column1 line2 column2)
+               (or (and (funcall relation line1 line2)
+                        (not (= line1 line2)))
+                   (and (= line1 line2)
+                        (funcall relation column1 column2))))
+             (rec (node)
                (multiple-value-bind
                      (start-line start-column end-line end-column)
                    (x:range node)
-                 (declare (ignore start-line end-line))
-                 (when (and (funcall start-relation start-column cursor-column)
-                            (funcall end-relation cursor-column end-column))
+                 (when (and (compare start-relation
+                                     start-line start-column
+                                     cursor-line cursor-column)
+                            (compare end-relation
+                                     cursor-line cursor-column
+                                     end-line end-column))
                    (mapc #'rec (x:children node))
-                   (when (listp node) (break))
                    (funcall function node)))))
       (mapc #'rec cst))))
