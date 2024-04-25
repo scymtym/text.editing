@@ -93,12 +93,14 @@
   "Smoke test for the `delete-delimiter-pair-or-item' function."
   (operation-cases (e:delete-delimiter-pair-or-item)
     (((:forward :backward) :if-not-empty (nil :move-past :delete-inside))
+     ;; No delimiters
      ("↑"      'c:end-of-buffer       'c:end-of-buffer       'c:end-of-buffer
                'c:beginning-of-buffer 'c:beginning-of-buffer 'c:beginning-of-buffer)
      ("↑1"     "↑"                    "↑"                    "↑"
                'c:beginning-of-buffer 'c:beginning-of-buffer 'c:beginning-of-buffer)
      ("1↑"     'c:end-of-buffer       'c:end-of-buffer       'c:end-of-buffer
                "↑"                    "↑"                    "↑")
+     ;; Heterogeneous delimiters
      ("↑()"    "↑"                    "↑"                    "↑"
                'c:beginning-of-buffer 'c:beginning-of-buffer 'c:beginning-of-buffer)
      ("↑( )"   "↑( )"                 "(↑ )"                 "↑()"
@@ -113,8 +115,24 @@
                "(↑ )"                 "↑( )"                 "(↑)")
      ("( ↑)"   "( ↑)"                 "( )↑"                 "(↑)"
                "(↑)"                  "(↑)"                  "(↑)")
-     ;; TODO Same stuff for one of the symmetrical pairs
-     )))
+     ;; Homogeneous delimiters
+     ;;
+     ;; This does not work so well since we cannot determine whether a
+     ;; given delimiter item is the opening or closing delimiter.
+     ("↑\"\""  "↑"                    "↑"                    "↑"
+               'c:beginning-of-buffer 'c:beginning-of-buffer 'c:beginning-of-buffer)
+     #+no ("↑\" \"" "↑\" \""               "\"↑ \""               "↑\"\""
+               'c:beginning-of-buffer 'c:beginning-of-buffer 'c:beginning-of-buffer)
+     ("\"\"↑"  'c:end-of-buffer       'c:end-of-buffer       'c:end-of-buffer
+               "↑"                    "↑"                    "↑")
+     #+no ("\" \"↑" 'c:end-of-buffer       'c:end-of-buffer       'c:end-of-buffer
+               "\" \"↑"               "\" ↑\""               "\"\"↑")
+     ("\"↑\""  "↑"                    "↑"                    "↑"
+               "↑"                    "↑"                    "↑")
+     ("\"↑ \"" "\"↑\""                "\"↑\""                "\"↑\""
+               "\"↑ \""               "↑\" \""               "\"↑\"")
+     ("\" ↑\"" "\" ↑\""               "\" \"↑"               "\"↑\""
+               "\"↑\""                "\"↑\""                "\"↑\""))))
 
 (test surround-with-delimiter-pair.smoke
   "Smoke test for the `surround-with-delimiter-pair' function."
