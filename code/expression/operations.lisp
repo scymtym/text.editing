@@ -502,3 +502,12 @@
            (edit:with-cloned-cursor (end cursor :line     best-end-line
                                                 :position best-end-column)
              (edit:delete cursor end :forward))))))
+
+(defmethod edit:perform ((target    edit:site)
+                         (operation (eql 'delete-semi-line-or-expressions))
+                         &rest operation-arguments)
+  (declare (ignore operation-arguments))
+  ;; Binding `*site*' makes `delete' operations that are performed as part of
+  ;; performing OPERATION store deleted items into the insertion stack.
+  (let ((edit::*site* target))
+    (call-next-method)))
