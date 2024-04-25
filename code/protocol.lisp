@@ -516,3 +516,19 @@ is positioned after the operation."))
 (defgeneric comment (cursor unit direction &key comment-syntax))
 
 (defgeneric uncomment (cursor unit direction))
+
+;;; Delimiter pairs
+
+(defgeneric insert-delimiter-pair (cursor opening &key closing))
+
+(defgeneric maybe-move-past-closing-delimiter (cursor closing &key whitespace))
+
+(defgeneric move-past-closing-delimiter (cursor closing &key whitespace))
+
+(defgeneric move-past-closing-delimiter-or-insert-delimiter-pair
+    (cursor delimiter &key whitespace))
+
+(defgeneric delete-delimiter-pair-or-item (cursor direction &key if-not-empty))
+
+(defgeneric surround-with-delimiter-pair (cursor unit direction opening
+                                          &key closing count))

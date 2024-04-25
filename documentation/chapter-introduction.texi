@@ -27,8 +27,9 @@ Transformations like
 or @ref{Generic-Function text.editing|transpose,transposing}
 
 @item
-Operations on expression (like
-@uref{https://paredit.org/,paredit for Emacs}, work in progress)
+@ref{Expressions,Operations on expressions} and other
+@ref{Operations on Delimiter Pairs,other structural editing operations}
+(like @uref{https://paredit.org/,paredit for Emacs})
 
 @item
 Undo (work in progress)

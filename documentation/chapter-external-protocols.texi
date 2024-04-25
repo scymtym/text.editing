@@ -478,6 +478,7 @@ bundle conditions for multiple sites in a single condition
 * Transposing Operations::
 * Filling Operations::
 * Commenting Operations::
+* Operations on Delimiter Pairs::
 @end menu
 
 @quotation note
@@ -825,7 +826,7 @@ behave as described for
 @node Commenting Operations
 @subsection Commenting Operations
 
-@defgena{comment,text.editing} cursor unit direction @pkey{} comment-syntax
+@defgena{comment,@toppackage{}} cursor unit direction @pkey{} comment-syntax
 Comment buffer items at or around @var{cursor} according to @var{unit}
 and @var{direction}.
 
@@ -834,7 +835,287 @@ the comment syntax to use.  The default is @t{;;} if @var{unit} is
 @ref{unit-line,line} and @t{#|} otherwise.
 @end deffn
 
-@defgena{uncomment,text.editing} cursor unit direction
+@defgena{uncomment,@toppackage{}} cursor unit direction
 Uncomment buffer items at or around @var{cursor} according to @var{unit}
 and @var{direction}.
+@end deffn
+
+@node Operations on Delimiter Pairs
+@subsection Operations on Delimiter Pairs
+
+@cindex delimiter pair
+@cindex structure editing
+The operations described in this section together with the operations of
+the @ref{Expressions,expressions} module allow structural editing of
+buffer contents in the sense that they transform a given buffer text
+that is syntactically valid to a new buffer text that is also
+syntactically valid.  This is in contrast to general operations such as
+deleting a single item: Consider deleting a single item in the buffer
+text @t{(length "hi")}.  If the deleted item is the @t{(}, the @t{)} or
+either of the @t{"}, the resulting buffer text is no longer a
+syntactically valid s-expression.  In this example, deletion operations
+that preserve the validity can, for example, delete both characters of
+the @t{()} and @t{""} pairs simultaneously once the items in between
+have been deleted or delete the respective delimiter pair in a single
+operation, thus ``raising'' the formerly surrounded items up one level
+of expression nesting:
+
+@lisp
+(length "hi") @result{} (length "") @result{} (length ) @result{} () @result{}
+(length "hi") @result{} length "hi"
+@end lisp
+
+The above examples illustrate two kinds of operations:
+
+@itemize
+
+@item
+The first kind are operations which are intended as structure-preserving
+variants of ``ordinary'' operations, mainly of insertion and deletion
+operations since those affect the structural validity when applied to
+delimiter characters.  These operations are described in the following
+section.
+
+@item
+The second kind, of which the ``raising'' operation is one example,
+consider the buffer text as an expression tree and perform modifications
+on that tree.  Those operations are described as a part of the
+@ref{Expressions,expressions} module (@pxref{Expression Operations}).
+
+@end itemize
+
+@defclassa{no-closing-delimiter-error,@toppackage{}}
+This error is signaled when an operation that requires a closing
+delimiter item is performed on a cursor that is not located at or near
+such an item.
+@end deftp
+
+@defgena{insert-delimiter-pair,@toppackage{}} cursor opening @pkey{}@
+  closing
+
+Insert the delimiter character @var{opening} before @var{cursor} and
+insert the delimiter character @var{closing} after @var{cursor}.
+
+If @var{closing} is not supplied, the closing delimiter character is
+determined by looking up the pair that has @var{opening} as the opening
+delimiter character in the set of known delimiter pairs.
+
+The return value of this function is unspecified.
+
+This function is intended to be used as a structure-preserving
+replacement for ``ordinary'' operations that insert an opening
+delimiter: When a user performs the operation for inserting the opening
+delimiter, operations for inserting some content and the operation for
+inserting the closing delimiter, the first operation has to insert both
+delimiters to avoid unbalanced delimiters:
+@example
+| @result{} (|) @result{} @dots{} @result{} (foo|) @result{} (foo)|
+@end example
+With this editing model, it is not allowed to insert an opening
+delimiter by itself.  This is also true for closing delimiters
+(@pxref{Generic-Function @toppackage{}|move-past-closing-delimiter,@t{move-past-closing-delimiter}})
+@end deffn
+
+@defgena{maybe-move-past-closing-delimiter,@toppackage{}} cursor closing@
+  @pkey{} whitespace
+
+If the item after @var{cursor} is equal to the character @var{closing},
+move @var{cursor} forward past the closing delimiter.
+
+@var{whitespace} which must be either @t{nil} or @t{:move-past} or
+@t{:delete} controls the behavior in case there are whitespace items
+between @var{cursor} and the item that is equal to @var{closing}.  If
+@var{whitespace} is @var{nil} and there are such items, @var{cursor}
+does not move.  If @var{whitespace} is @var{:move-past}, @var{cursor}
+moves past the whitespace items and past the closing delimiter.  If
+@var{whitespace} is @t{:delete}, the whitespace items are deleted, and
+@var{cursor} is moved passed the closing delimiter.
+
+Return true if @var{cursor} has moved and false otherwise.
+@end deffn
+
+@defgena{move-past-closing-delimiter,@toppackage{}} cursor closing@
+  @pkey{} whitespace
+
+If the item after @var{cursor} is equal to the character @var{closing},
+move @var{cursor} forward past the closing delimiter.
+
+@var{whitespace} controls the behavior in case @var{cursor} is separated
+from the closing delimiter by whitespace.  See
+@ref{Generic-Function @toppackage{}|maybe-move-past-closing-delimiter,@t{maybe-move-past-closing-delimiter}}
+for details.
+
+The return value of this function is unspecified.
+
+If the item after @var{cursor}, either immediately after or the first
+non-whitespace item after, is not equal to @var{cursor}, signal an error
+of type
+@ref{Class @toppackage{}|no-closing-delimiter-error,@t{no-closing-delimiter-error}}.
+
+This function is intended to be used as a structure-preserving
+replacement for ``ordinary'' operations that insert an ``asymmetrical''
+(that is, for example @t{)} but not @t{"}) closing delimiter: When a
+user performs the operation for inserting the opening delimiter,
+operations for inserting some content and the operation for inserting
+the closing delimiter, the first operation has to insert both delimiters
+and the final operation simply has to move past the closing delimiter:
+@example
+| @result{} (|) @result{} @dots{} @result{} (foo|) @result{} (foo)|
+@end example
+With this editing model, it is never necessary and in fact never allowed
+to insert a closing delimiter by itself which is why this function
+signals an error if there is no closing delimiter to move past.  This is
+also true for opening delimiters
+(@pxref{Generic-Function @toppackage{}|insert-delimiter-pair,@t{insert-delimiter-pair}}).
+@end deffn
+
+@defgena{move-past-closing-delimiter-or-insert-delimiter-pair,@toppackage{}}@
+  cursor delimiter @pkey{} whitespace
+
+If the item after @var{cursor} is equal to the character
+@var{delimiter}, move @var{cursor} forward past the (assumed to be)
+closing delimiter.  If the item after @var{cursor} is not equal to the
+character @var{delimiter}, insert @var{delimiter} before @var{cursor}
+and insert @var{delimiter} after @var{cursor}.
+
+@var{whitespace} controls the behavior in case @var{cursor} is separated
+from the closing delimiter by whitespace.  See
+@ref{Generic-Function @toppackage{}|maybe-move-past-closing-delimiter,@t{maybe-move-past-closing-delimiter}}
+for details.
+
+Return true if a pair of delimiters has been inserted and false
+otherwise.
+
+This function is intended to be used as a structure-preserving
+replacement for ``ordinary'' operations that insert a ``symmetrical''
+(that is, for example @t{"} but not @t{)}) delimiter: When a user
+performs the operation for inserting @var{delimiter}, operations for
+inserting some content and the operation for inserting @var{delimiter}
+again, the first operation has to insert @var{delimiter} twice and the
+final operation simply has move past the second delimiter:
+@example
+| @result{} "|" @result{} @dots{} @result{} "foo|" @result{} "foo"|
+@end example
+With this editing model, it is never necessary and in fact never allowed
+to insert a single delimiter by itself which is why this function
+inserts a delimiter pair if there is no closing delimiter to move past.
+
+Examples:
+@example
+  @t{(move-past-closing-delimiter-or-insert-delimiter-pair cursor #\")} in
+  "foo|"
+@result{} "foo"|
+
+  @t{(move-past-closing-delimiter-or-insert-delimiter-pair cursor #\")} in
+  (length |)
+@result{} (length "|")
+@end example
+@end deffn
+
+@defgena{delete-delimiter-pair-or-item,@toppackage{}} cursor@
+  direction @pkey{} if-not-empty
+
+If there is one, delete the pair of delimiter characters which contains
+@var{cursor}.  Otherwise delete an item in @var{direction}.
+
+In this context, a delimiter pair @emph{contains} @var{cursor}, if
+either the delimiter characters surround @var{cursor} or if
+@var{direction} is @t{:forward} and the opening delimiter is the item
+after @var{cursor} or if @var{direction} is @t{:backward} and the
+closing delimiter is the item before @var{cursor}.
+
+@var{if-not-empty} controls the behavior in case the operation is
+applied to a delimiter pair that is not empty in the sense that the
+opening and the closing delimiter surround other buffer items:
+
+@table @t
+
+@item nil
+Do nothing, do not move @var{cursor} and do not delete any items.
+
+@item :move-past
+Move @var{cursor} past the ``obstructing'' delimiter and into the
+delimited content so that subsequent deletion operations will delete the
+content item by item until the delimited content is empty and the
+delimiter pair can be deleted.
+
+@item :delete-inside
+Do not move @var{cursor} but delete one item from the content that is
+delimited by the ``obstructing'' delimiter.  This behavior can be
+repeated until the delimited content is empty and the delimiter pair can
+be deleted.
+
+@item @var{a-function}
+Call the supplied function with two arguments, @var{cursor} and an
+description of the ``obstacle'' which is either @t{:outside} or
+@t{:inside}.  The function can delete items near @var{cursor} or move
+@var{cursor} as appropriate.
+
+@end table
+
+The return value of this function is unspecified.
+
+This function is intended to be used as a structure-preserving
+replacement for ``ordinary'' operations that delete a single item: If
+the to-be-deleted item is a closing delimiter or an opening delimiter,
+the ``opposite'' delimiter has to be deleted in the same operation to
+maintain delimiter balance.  If the to-be-deleted item is not a
+delimiter, the task can be delegated to the ``ordinary'' deletion
+operation.
+
+Examples:
+@example
+@t{(delete-delimiter-pair-or-item cursor :forward)} in
+  |()
+@result{} |
+
+@t{(delete-delimiter-pair-or-item cursor :forward)} in
+  (|)
+@result{} |
+
+@t{(delete-delimiter-pair-or-item cursor :forward :if-not-empty @var{if-not-empty})} in
+  (foo|)
+@result{} (foo|)  when @var{if-not-empty} is @t{nil}
+@result{} (foo)|  when @var{if-not-empty} is @t{:move-past}
+@result{} (fo|)   when @var{if-not-empty} is @t{:delete-inside}
+
+@t{(delete-delimiter-pair-or-item cursor :forward :if-not-empty @var{if-not-empty})} in
+  |(foo)
+@result{} |(foo)  when @var{if-not-empty} is @t{nil}
+@result{} (|foo)  when @var{if-not-empty} is @t{:move-past}
+@result{} |(oo)   when @var{if-not-empty} is @t{:delete-inside}
+@end example
+@end deffn
+
+@defgena{surround-with-delimiter-pair,@toppackage{}} cursor unit direction@
+  opening @pkey{} closing count
+
+Surround the item sequence between @var{cursor} and the location that
+would result from moving @var{cursor} @var{count} times by @var{unit} in
+@var{direction} with the delimiters @var{opening} and @var{closing}.
+
+If supplied, @var{closing} is a character that should be used as the
+closing delimiter of the pair.  If @var{closing} is not supplied, the
+result of evaluating @t{(closing-delimiter @var{opening})} is used.
+
+If supplied, @var{count} controls how many units as indicated by
+@var{unit} should be surrounded by the inserted delimiters.  If
+@var{count} is not supplied, a single unit is used.
+
+The return value of this function is unspecified.
+
+Examples:
+@example
+@t{(surround-with-delimiter-pair cursor @ref{unit-word,word} :forward #\")} in
+  |foo bar
+@result{} "|foo" bar
+
+@t{(surround-with-delimiter-pair cursor @ref{unit-word,word} :forward #\" :count 2)} in
+  |foo bar
+@result{} "|foo bar"
+
+@t{(surround-with-delimiter-pair cursor @ref{unit-word,word} :backward #\( :count 2)} in
+  foo bar| baz
+@result{} (foo bar|) baz
+@end example
 @end deffn

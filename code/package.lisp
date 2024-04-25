@@ -49,7 +49,12 @@
 
    #:operation-would-collapse-sites-error
    #:operation
-   #:arguments)
+   #:arguments
+
+   #:delimiter-condition
+   #:delimiter
+
+   #:no-closing-delimiter-error)
 
   ;; Direction utilities
   (:export
@@ -238,4 +243,13 @@
   ;; Commenting
   (:export
    #:comment
-   #:uncomment))
+   #:uncomment)
+
+  ;; Delimiter pairs
+  (:export
+   #:insert-delimiter-pair
+   #:maybe-move-past-closing-delimiter
+   #:move-past-closing-delimiter
+   #:move-past-closing-delimiter-or-insert-delimiter-pair
+   #:delete-delimiter-pair-or-item
+   #:surround-with-delimiter-pair))

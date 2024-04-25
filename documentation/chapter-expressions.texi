@@ -258,6 +258,12 @@ parameters,
 @node Expression Operations
 @subsection Expression Operations
 
+@cindex structure editing
+The operations described in this section are designed to, in
+conjunctions with the
+@ref{Operations on Delimiter Pairs,operations on delimiter pairs},
+enable structural editing of buffer contents.
+
 @defgena{raise,@toppackage{}.expression} cursor unit direction
 
 Raise the innermost @ref{term-expression,expression} @math{e} which

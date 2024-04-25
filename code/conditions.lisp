@@ -95,3 +95,21 @@
                      multiple sites would collapse the points of all sites ~
                      to the same location.~@:>"
              (operation condition) (arguments condition)))))
+
+;;; Delimiter conditions
+
+(define-condition delimiter-condition (editing-condition)
+  ((%delimiter :initarg :delimiter
+               :reader  delimiter))
+  (:default-initargs
+   :delimiter (a:required-argument :delimiter)))
+
+(define-condition no-closing-delimiter-error (delimiter-condition
+                                              maybe-site-condition
+                                              cursor-condition
+                                              error)
+  ()
+  (:report
+   (lambda (condition stream)
+     (format stream "~@<There is no closing ~C after cursor.~@:>"
+             (delimiter condition)))))

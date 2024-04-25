@@ -42,7 +42,8 @@
                               (:file "changing-case")
                               (:file "transposing")
                               (:file "filling")
-                              (:file "commenting")))
+                              (:file "commenting")
+                              (:file "delimiter-pairs")))
 
                 (:module     "search"
                  :pathname   "code/search"
@@ -93,7 +94,8 @@
                               (:file "copying")
                               (:file "changing-case")
                               (:file "transposing")
-                              (:file "filling")))
+                              (:file "filling")
+                              (:file "delimiter-pairs")))
 
                 (:module     "search"
                  :pathname   "test/search"
