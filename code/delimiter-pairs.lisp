@@ -117,13 +117,12 @@
                            (,(dir delete-item-forward) cursor)
                            (,(dir delete-item-backward) cursor))
                           ;; Forward: ↑(); backward: ()↑
-                          ((progn
-                             (when (not (null opposite))
-                               (with-cloned-cursor (probe cursor)
-                                 (,(dir move-item-forward) probe)
-                                 (and (not (,(dir c:end-of-buffer-p) probe))
-                                      (eql (,(dir item-after-cursor*) probe)
-                                           opposite)))))
+                          ((when (not (null opposite))
+                             (with-cloned-cursor (probe cursor)
+                               (,(dir move-item-forward) probe)
+                               (and (not (,(dir c:end-of-buffer-p) probe))
+                                    (eql (,(dir item-after-cursor*) probe)
+                                         opposite))))
                            ;; Delete opening and closing delimiters after
                            ;; (before) CURSOR.
                            (loop :repeat 2
