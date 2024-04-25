@@ -51,6 +51,10 @@
    #:operation
    #:arguments)
 
+  ;; Direction utilities
+  (:export
+   #:opposite-direction)
+
   ;; Line utilities
   (:export
    #:next-line

@@ -11,3 +11,6 @@
 
 (deftype position-designator ()
   '(or (integer 0) (member :start :end)))
+
+(deftype direction ()
+  '(member :forward :backward))

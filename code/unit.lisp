@@ -6,13 +6,6 @@
 
 (cl:in-package #:text.editing)
 
-;;; Utilities
-
-(defun opposite-direction (direction)
-  (ecase direction
-    (:forward  :backward)
-    (:backward :forward)))
-
 ;;; Unit definitions
 
 ;;; TODO same code in (at least) eclector, text.document-schema

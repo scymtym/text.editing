@@ -22,6 +22,7 @@
                               (:file "protocol")
                               (:file "conditions")
 
+                              (:file "direction")
                               (:file "line-utilities")
                               (:file "cursor-utilities")
 

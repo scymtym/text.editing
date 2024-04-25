@@ -294,9 +294,7 @@
       (edit:with-cloned-cursor (sibling-boundary cursor)
         (if (null sibling)
             (move-to-expression-boundary
-             sibling-boundary child (ecase direction
-                                      (:forward  :start)
-                                      (:backward :end)))
+             sibling-boundary child (edit::opposite-direction direction)) ; TODO export
             (move-to-expression-boundary sibling-boundary sibling direction))
         (with-cursor-at-expression-boundary
             (child-boundary cursor child direction)
@@ -393,7 +391,7 @@
         (boundary cursor expression direction)
       (edit:with-cloned-cursor (child-boundary boundary)
         (if (null child)
-            (move-delimiter child-boundary (edit::opposite-direction direction))
+            (move-delimiter child-boundary (edit:opposite-direction direction))
             (move-to-expression-boundary child-boundary child direction))
         (with-cursor-at-expression-boundary
             (target-boundary cursor target direction)
