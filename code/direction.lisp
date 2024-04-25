@@ -34,3 +34,8 @@
 (defmacro opposite-pair (name1 name2)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (mark-opposite-pair ',name1 ',name2)))
+
+;;; Annotations for Cluffer functions
+
+(opposite-pair c:end-of-buffer-p c:beginning-of-buffer-p)
+(opposite-pair c:end-of-line-p   c:beginning-of-line-p)

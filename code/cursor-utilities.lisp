@@ -19,6 +19,8 @@
       #\Newline
       (c:item-before-cursor cursor)))
 
+(opposite-pair item-after-cursor* item-before-cursor*)
+
 ;;; Primitive cursor movement
 
 (defun move-item-forward (cursor)
@@ -37,6 +39,8 @@
         (t
          (c:backward-item cursor))))
 
+(opposite-pair move-item-forward move-item-backward)
+
 ;;; Primitive deletion
 
 (defmethod delete-item-forward ((cursor c:cursor))
@@ -54,6 +58,8 @@
          (c:join-line (previous-line cursor)))
         (t
          (c:erase-item cursor))))
+
+(opposite-pair delete-item-forward delete-item-backward)
 
 ;;; Cursor attach helpers
 
