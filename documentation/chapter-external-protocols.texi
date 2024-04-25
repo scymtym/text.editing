@@ -953,7 +953,7 @@ of type
 @ref{Class @toppackage{}|no-closing-delimiter-error,@t{no-closing-delimiter-error}}.
 
 This function is intended to be used as a structure-preserving
-replacement for ``ordinary'' operations that insert an ``asymmetrical''
+replacement for ``ordinary'' operations that insert an ``heterogeneous''
 (that is, for example @t{)} but not @t{"}) closing delimiter: When a
 user performs the operation for inserting the opening delimiter,
 operations for inserting some content and the operation for inserting
@@ -987,7 +987,7 @@ Return true if a pair of delimiters has been inserted and false
 otherwise.
 
 This function is intended to be used as a structure-preserving
-replacement for ``ordinary'' operations that insert a ``symmetrical''
+replacement for ``ordinary'' operations that insert a ``homogeneous''
 (that is, for example @t{"} but not @t{)}) delimiter: When a user
 performs the operation for inserting @var{delimiter}, operations for
 inserting some content and the operation for inserting @var{delimiter}
