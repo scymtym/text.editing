@@ -6,7 +6,7 @@
 @end menu
 
 This section defines a few concepts that are important for the
-@sysname{} library and describes how they related to each other.  The
+@sysname{} library and describes how they relate to each other.  The
 following figure illustrates some of the concepts and their relations:
 
 @float Figure,fig:architecture
