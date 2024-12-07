@@ -62,7 +62,7 @@
         (format stream "@example~%")
         (let ((utilities.print-tree:*use-unicode?* nil))
           (utilities.print-tree:print-tree
-           *standard-output* root
+           stream root
            (utilities.print-tree:make-node-printer
             (lambda (stream depth node)
               (declare (ignore depth))
